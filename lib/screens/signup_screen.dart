@@ -7,887 +7,321 @@ import 'package:reviveecotech_rider/screens/verify_email_screen.dart';
 import 'theme_controller.dart';
 import '../localization/app_localizations.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
 
   @override
-  State<SignUpScreen> createState() =>
-      _SignUpScreenState();
+  State<SignUpScreen> createState() => _SignUpScreenState();
 }
 
-class _SignUpScreenState
-    extends State<SignUpScreen> {
-
+class _SignUpScreenState extends State<SignUpScreen> {
   String tr(String key) {
-
-    return AppLocalizations.of(
-      context,
-    ).translate(key);
+    return AppLocalizations.of(context).translate(key);
   }
 
   bool _isPasswordVisible = false;
-
-  final AuthService _authService =
-      AuthService();
-
+  final AuthService _authService = AuthService();
   bool _isLoading = false;
 
-  final TextEditingController
-      _nameController =
-          TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
 
-  final TextEditingController
-      _emailController =
-          TextEditingController();
-
-  final TextEditingController
-      _passwordController =
-          TextEditingController();
+  // ── Colors ──
+  static const navy = Color(0xFF0B132B);
+  static const green = Color(0xFF10B981);
 
   @override
   Widget build(BuildContext context) {
-
-    return ValueListenableBuilder(
-      valueListenable:
-          isDarkMode,
-
-      builder:
-          (context, value, child) {
-
-        return Scaffold(
-
-          backgroundColor:
-              isDarkMode.value
-                  ? const Color(
-                      0xFF1E1E1E)
-                  : const Color(
-                      0xFFFCF3E3),
-
-          body: Column(
-            crossAxisAlignment:
-                CrossAxisAlignment
-                    .stretch,
-
-            children: [
-
-              /// HEADER
-              Container(
-                height: 260,
-
-                color:
-                    const Color(
-                        0xFF003856),
-
-                child: Padding(
-                  padding:
-                      const EdgeInsets
-                          .only(
-                              top: 32),
-
-                  child: Center(
-                    child:
-                        Image.asset(
-                      'assets/images/revive_logo.jpg',
-
-                      width: 300,
-                    ),
-                  ),
-                ),
-              ),
-
-              Expanded(
-                child:
-                    SingleChildScrollView(
-                  child: Column(
-                    children: [
-
-                      const SizedBox(
-                          height:
-                              16),
-
-                      /// TITLE
-                      Text(
-                        tr('sign_up'),
-
-                        style:
-                            TextStyle(
-                          fontSize:
-                              28,
-
-                          fontWeight:
-                              FontWeight
-                                  .w800,
-
-                          fontFamily:
-                              'RedHatDisplay',
-
-                          color:
-                              isDarkMode.value
-                                  ? Colors.white
-                                  : const Color(
-                                      0xFF003856),
-                        ),
-                      ),
-
-                      const SizedBox(
-                          height:
-                              10),
-
-                      /// Divider + shadow
-                      Column(
-                        children: [
-
-                          Container(
-                            height:
-                                2.5,
-
-                            width:
-                                double
-                                    .infinity,
-
-                            color:
-                                const Color(
-                                    0xFF003856),
-                          ),
-
-                          Container(
-                            height:
-                                22,
-
-                            decoration:
-                                BoxDecoration(
-                              gradient:
-                                  LinearGradient(
-                                begin:
-                                    Alignment.topCenter,
-
-                                end:
-                                    Alignment.bottomCenter,
-
-                                colors: [
-
-                                  Colors.black.withAlpha(
-                                      76),
-
-                                  Colors.black.withAlpha(
-                                      40),
-
-                                  Colors.black.withAlpha(
-                                      20),
-
-                                  Colors.transparent,
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(
-                          height:
-                              15),
-
-                      Text(
-                        tr('future_text'),
-
-                        style:
-                            TextStyle(
-                          fontSize:
-                              22,
-
-                          fontWeight:
-                              FontWeight
-                                  .bold,
-
-                          color:
-                              isDarkMode.value
-                                  ? Colors.white
-                                  : const Color(
-                                      0xFF003856),
-
-                          fontFamily:
-                              'RedHatDisplay',
-                        ),
-                      ),
-
-                      const SizedBox(
-                          height:
-                              20),
-
-                      /// FULL NAME
-                      _inputField(
-                        controller:
-                            _nameController,
-
-                        hint:
-                            tr('full_name'),
-
-                        icon: Icons
-                            .person_outline,
-                      ),
-
-                      const SizedBox(
-                          height:
-                              25),
-
-                      /// EMAIL
-                      _inputField(
-                        controller:
-                            _emailController,
-
-                        hint:
-                            tr('email'),
-
-                        icon: Icons
-                            .email_outlined,
-                      ),
-
-                      const SizedBox(
-                          height:
-                              25),
-
-                      /// PASSWORD
-                      _passwordField(
-                        controller:
-                            _passwordController,
-
-                        hint:
-                            tr('password'),
-
-                        isVisible:
-                            _isPasswordVisible,
-
-                        toggle: () {
-
-                          setState(() {
-
-                            _isPasswordVisible =
-                                !_isPasswordVisible;
-                          });
-                        },
-                      ),
-
-                      const SizedBox(
-                          height:
-                              30),
-
-                      /// SIGNUP BUTTON
-                      Padding(
-                        padding:
-                            const EdgeInsets
-                                .symmetric(
-                          horizontal:
-                              40,
-                        ),
-
-                        child:
-                            SizedBox(
-                          width:
-                              double
-                                  .infinity,
-
-                          child:
-                              ElevatedButton(
-                            onPressed:
-                                () async {
-
-                              setState(
-                                  () =>
-                                      _isLoading =
-                                          true);
-
-                              try {
-
-                                final user =
-                                    await _authService.signUp(
-
-                                  email:
-                                      _emailController.text.trim(),
-
-                                  password:
-                                      _passwordController.text.trim(),
-
-                                  name:
-                                      _nameController.text.trim(),
-                                );
-
-                                if (user != null) {
-
-                                  await FirebaseFirestore.instance
-                                      .collection('agents')
-                                      .doc(user.uid)
-                                      .set({
-
-                                    'name':
-                                        _nameController.text.trim(),
-
-                                    'email':
-                                        _emailController.text.trim(),
-
-                                    'uid':
-                                        user.uid,
-
-
-                                  });
-                                }
-
-                                if (user !=
-                                    null) {
-
-                                  if (!mounted)
-                                    return;
-
-                                  Navigator.pushReplacement(
-
-                                    context,
-
-                                    MaterialPageRoute(
-                                      builder: (_) =>
-                                          const VerifyEmailScreen(),
-                                    ),
-                                  );
-                                }
-                              } catch (e) {
-
-                                if (!mounted)
-                                  return;
-
-                                ScaffoldMessenger.of(
-                                        context)
-                                    .showSnackBar(
-
-                                  SnackBar(
-                                    content:
-                                        Text(
-                                      e.toString(),
-                                    ),
-                                  ),
-                                );
-                              }
-
-                              if (mounted) {
-
-                                setState(
-                                    () =>
-                                        _isLoading =
-                                            false);
-                              }
-                            },
-
-                            style:
-                                ElevatedButton.styleFrom(
-
-                              backgroundColor:
-                                  const Color(
-                                      0xFF98C13F),
-
-                              padding:
-                                  const EdgeInsets.symmetric(
-                                vertical:
-                                    16,
-                              ),
-
-                              shape:
-                                  RoundedRectangleBorder(
-                                borderRadius:
-                                    BorderRadius.circular(
-                                        50),
-                              ),
-
-                              elevation:
-                                  8,
-                            ),
-
-                            child: _isLoading
-
-                                ? const CircularProgressIndicator(
-                                    color:
-                                        Colors.white)
-
-                                : Text(
-                                    tr('sign_up'),
-
-                                    style:
-                                        const TextStyle(
-                                      fontSize:
-                                          24,
-
-                                      fontWeight:
-                                          FontWeight.bold,
-
-                                      color:
-                                          Colors.white,
-
-                                      fontFamily:
-                                          'RedHatDisplay',
-                                    ),
-                                  ),
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(
-                          height:
-                              20),
-
-                      /// BACK TO LOGIN
-                      Row(
-                        mainAxisAlignment:
-                            MainAxisAlignment
-                                .center,
-
-                        children: [
-
-                          Text(
-                            tr('already_account'),
-
-                            style:
-                                TextStyle(
-
-                              color:
-                                  isDarkMode.value
-                                      ? Colors.white70
-                                      : Colors.black,
-
-                              fontFamily:
-                                  'RedHatDisplay',
-                            ),
-                          ),
-
-                          GestureDetector(
-                            onTap: () =>
-                                Navigator.pushReplacement(
-
-                              context,
-
-                              MaterialPageRoute(
-                                builder:
-                                    (context) =>
-                                        const LoginScreen(),
-                              ),
-                            ),
-
-                            child: Text(
-                              tr('login'),
-
-                              style:
-                                  const TextStyle(
-                                fontWeight:
-                                    FontWeight.bold,
-
-                                color: Color(
-                                    0xFF003856),
-
-                                fontFamily:
-                                    'RedHatDisplay',
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(
-                          height:
-                              10),
-
-                      /// OR CONNECT WITH
-                      Padding(
-                        padding:
-                            const EdgeInsets
-                                .symmetric(
-                          horizontal:
-                              40.0,
-                        ),
-
-                        child: Row(
-                          children: [
-
-                            const Expanded(
-                              child:
-                                  Divider(
-                                color: Color(
-                                    0xFF003856),
-
-                                thickness:
-                                    1,
-                              ),
-                            ),
-
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(
-                                      horizontal:
-                                          10.0),
-
-                              child: Text(
-                                tr('or_connect'),
-
-                                style:
-                                    TextStyle(
-                                  color:
-                                      isDarkMode.value
-                                          ? Colors.white
-                                          : const Color(
-                                              0xFF003856),
-
-                                  fontWeight:
-                                      FontWeight.bold,
-
-                                  fontFamily:
-                                      'RedHatDisplay',
-                                ),
-                              ),
-                            ),
-
-                            const Expanded(
-                              child:
-                                  Divider(
-                                color: Color(
-                                    0xFF003856),
-
-                                thickness:
-                                    1,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      const SizedBox(
-                          height:
-                              20),
-
-                      /// SOCIAL LOGIN BUTTONS
-                      Padding(
-                        padding:
-                            const EdgeInsets
-                                .symmetric(
-                          horizontal:
-                              40.0,
-                        ),
-
-                        child: Row(
-                          mainAxisAlignment:
-                              MainAxisAlignment
-                                  .spaceBetween,
-
-                          children: [
-
-                            /// GOOGLE BUTTON
-                            Expanded(
-                              child:
-                                  ElevatedButton.icon(
-
-                                onPressed: () async {
-
-                                  setState(() {
-                                    _isLoading = true;
-                                  });
-
-                                  try {
-
-                                    final userCredential =
-                                        await _authService
-                                            .signInWithGoogle();
-
-                                    if (userCredential != null) {
-
-                                      if (!mounted) return;
-
-                                      Navigator.pushReplacement(
-
-                                        context,
-
-                                        MaterialPageRoute(
-                                          builder: (context) =>
-                                              const DashboardScreen(),
-                                        ),
-                                      );
-                                    }
-
-                                  } catch (e) {
-
-                                    if (!mounted) return;
-
-                                    ScaffoldMessenger.of(context)
-                                        .showSnackBar(
-
-                                      SnackBar(
-                                        content: Text(
-                                          e.toString(),
-                                        ),
-                                      ),
-                                    );
-
-                                  } finally {
-
-                                    if (mounted) {
-
-                                      setState(() {
-                                        _isLoading = false;
-                                      });
-                                    }
-                                  }
-                                },
-
-                                icon: const FaIcon(
-                                  FontAwesomeIcons.google,
-                                  color: Colors.red,
-                                ),
-
-                                label: Text(
-                                  tr('google'),
-                                ),
-                              ),
-                            ),
-
-                            const SizedBox(
-                                width:
-                                    20),
-
-                            /// APPLE BUTTON
-                            Expanded(
-                              child:
-                                  ElevatedButton.icon(
-                                onPressed:
-                                    () {},
-
-                                icon:
-                                    const FaIcon(
-                                  FontAwesomeIcons.apple,
-                                  color:
-                                      Colors.black,
-                                ),
-
-                                label:
-                                    Text(
-                                  tr('apple'),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      const SizedBox(
-                          height:
-                              20),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _inputField({
-    required TextEditingController
-        controller,
-
-    required String hint,
-
-    required IconData icon,
-  }) {
-
-    return Padding(
-      padding:
-          const EdgeInsets.symmetric(
-              horizontal: 40),
-
-      child: Container(
-        decoration:
-            _boxDecoration(),
-
-        child: TextField(
-          controller:
-              controller,
-
-          style: TextStyle(
-            color:
-                isDarkMode.value
-                    ? Colors.white
-                    : Colors.black,
-          ),
-
-          decoration:
-              _inputDecoration(
-            hint,
-            icon,
-          ),
-
-          textInputAction:
-              TextInputAction.next,
-        ),
-      ),
-    );
-  }
-
-  Widget _passwordField({
-    required TextEditingController
-        controller,
-
-    required String hint,
-
-    required bool isVisible,
-
-    required VoidCallback toggle,
-  }) {
-
-    return Padding(
-      padding:
-          const EdgeInsets.symmetric(
-              horizontal: 40),
-
-      child: Container(
-        decoration:
-            _boxDecoration(),
-
-        child: TextField(
-          controller:
-              controller,
-
-          obscureText:
-              !isVisible,
-
-          style: TextStyle(
-            color:
-                isDarkMode.value
-                    ? Colors.white
-                    : Colors.black,
-          ),
-
-          decoration:
-              _inputDecoration(
-
-            hint,
-
-            Icons.lock_outline,
-
-            suffix: IconButton(
-              onPressed:
-                  toggle,
-
-              icon: Icon(
-
-                isVisible
-                    ? Icons.visibility
-                    : Icons.visibility_off,
-
-                color:
-                    const Color(
-                        0xFF98C13F),
+    return Scaffold(
+      backgroundColor: navy,
+      body: Stack(
+        children: [
+          // 🔵 Background Gradient
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [navy, Color(0xFF0D1F3C), Color(0xFF162032)],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
               ),
             ),
           ),
 
-          textInputAction:
-              TextInputAction.done,
+          // 🏢 Content
+          SafeArea(
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.symmetric(horizontal: 28),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const SizedBox(height: 20),
+                  
+                  // 🏁 Logo Section
+                  Center(
+                    child: Image.asset(
+                      'assets/images/revive_logo_transparent.png',
+                      width: 240,
+                      errorBuilder: (context, error, stackTrace) => const Icon(Icons.eco_rounded, size: 60, color: green),
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 40),
+                  
+                  // 📝 Form Section
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Create Account',
+                        style: TextStyle(
+                          fontSize: 32,
+                          fontWeight: FontWeight.w900,
+                          fontFamily: 'RedHatDisplay',
+                          color: Colors.white,
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Become part of our eco-friendly future.',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          fontFamily: 'RedHatDisplay',
+                          color: Colors.white60,
+                        ),
+                      ),
+                    ],
+                  ),
+                  
+                  const SizedBox(height: 40),
+                  
+                  // 👤 Name Field
+                  _buildTextField(
+                    controller: _nameController,
+                    hint: 'Full Name',
+                    icon: Icons.person_outline_rounded,
+                  ),
+                  
+                  const SizedBox(height: 18),
+                  
+                  // 📧 Email Field
+                  _buildTextField(
+                    controller: _emailController,
+                    hint: 'Email Address',
+                    icon: Icons.alternate_email_rounded,
+                    keyboardType: TextInputType.emailAddress,
+                  ),
+                  
+                  const SizedBox(height: 18),
+                  
+                  // 🔒 Password Field
+                  _buildTextField(
+                    controller: _passwordController,
+                    hint: 'Password',
+                    icon: Icons.lock_outline_rounded,
+                    isPassword: true,
+                    isPasswordVisible: _isPasswordVisible,
+                    onTogglePassword: () => setState(() => _isPasswordVisible = !_isPasswordVisible),
+                  ),
+                  
+                  const SizedBox(height: 40),
+                  
+                  // 🚀 Signup Button
+                  GestureDetector(
+                    onTap: _signUp,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 20),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(colors: [green, Color(0xFF059669)]),
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: green.withAlpha(80),
+                            blurRadius: 20,
+                            offset: const Offset(0, 10),
+                          ),
+                        ],
+                      ),
+                      child: Center(
+                        child: _isLoading 
+                            ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3))
+                            : const Text(
+                                'Sign Up',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w900,
+                                  color: Colors.white,
+                                  fontFamily: 'RedHatDisplay',
+                                  letterSpacing: 1.2,
+                                ),
+                              ),
+                      ),
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 32),
+                  
+                  // 🌐 Google Signup
+                  GestureDetector(
+                    onTap: _signUpWithGoogle,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 18),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withAlpha(10),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: Colors.white12),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          FaIcon(FontAwesomeIcons.google, color: Colors.blueAccent.withAlpha(200), size: 20),
+                          const SizedBox(width: 14),
+                          const Text(
+                            'Sign up with Google',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              fontFamily: 'RedHatDisplay',
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 48),
+                  
+                  // 🔗 Login Link
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text(
+                        "Already have an account?",
+                        style: TextStyle(color: Colors.white60, fontWeight: FontWeight.w500),
+                      ),
+                      const SizedBox(width: 8),
+                      GestureDetector(
+                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen())),
+                        child: const Text(
+                          'Login',
+                          style: TextStyle(
+                            color: green,
+                            fontWeight: FontWeight.w900,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 40),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String hint,
+    required IconData icon,
+    bool isPassword = false,
+    bool isPasswordVisible = false,
+    VoidCallback? onTogglePassword,
+    TextInputType keyboardType = TextInputType.text,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white.withAlpha(8),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.white12),
+      ),
+      child: TextField(
+        controller: controller,
+        obscureText: isPassword && !isPasswordVisible,
+        keyboardType: keyboardType,
+        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontFamily: 'RedHatDisplay'),
+        decoration: InputDecoration(
+          hintText: hint,
+          hintStyle: const TextStyle(color: Colors.white30, fontWeight: FontWeight.w500),
+          prefixIcon: Icon(icon, color: green.withAlpha(180)),
+          suffixIcon: isPassword
+              ? IconButton(
+                  onPressed: onTogglePassword,
+                  icon: Icon(
+                    isPasswordVisible ? Icons.visibility_off_rounded : Icons.visibility_rounded,
+                    color: Colors.white30,
+                  ),
+                )
+              : null,
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(vertical: 20),
         ),
       ),
     );
   }
 
-  BoxDecoration _boxDecoration() =>
-      BoxDecoration(
-
-        color:
-            isDarkMode.value
-                ? const Color(
-                    0xFF2A2A2A)
-                : const Color(
-                    0xFFFCF3E3),
-
-        borderRadius:
-            BorderRadius.circular(
-                50),
-
-        boxShadow: [
-
-          BoxShadow(
-            color:
-                Colors.black
-                    .withAlpha(76),
-
-            spreadRadius: 2,
-
-            blurRadius: 10,
-
-            offset:
-                const Offset(0, 4),
-          ),
-        ],
+  void _signUp() async {
+    if (_nameController.text.trim().isEmpty || _emailController.text.trim().isEmpty || _passwordController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please fill all fields'), backgroundColor: Colors.orange));
+      return;
+    }
+    setState(() => _isLoading = true);
+    try {
+      final user = await _authService.signUp(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+        name: _nameController.text.trim(),
       );
+      if (user != null) {
+        await FirebaseFirestore.instance.collection('agents').doc(user.uid).set({
+          'name': _nameController.text.trim(),
+          'email': _emailController.text.trim(),
+          'uid': user.uid,
+          'isOnline': false,
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+        if (!mounted) return;
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const VerifyEmailScreen()));
+      }
+    } catch (e) {
+      String message = 'Signup Failed';
+      if (e is FirebaseAuthException) message = e.message ?? 'Signup Failed';
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message), backgroundColor: Colors.redAccent));
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
 
-  InputDecoration
-      _inputDecoration(
-    String hint,
-    IconData icon, {
-
-    Widget? suffix,
-  }) =>
-
-      InputDecoration(
-        contentPadding:
-            const EdgeInsets.symmetric(
-                vertical: 20),
-
-        border:
-            InputBorder.none,
-
-        hintText: hint,
-
-        hintStyle:
-            TextStyle(
-
-          color:
-              isDarkMode.value
-                  ? Colors.white70
-                  : const Color(
-                      0xFF003856),
-
-          fontWeight:
-              FontWeight.w500,
-        ),
-
-        prefixIcon: Padding(
-          padding:
-              const EdgeInsets.only(
-            left: 20,
-            right: 10,
-          ),
-
-          child: Icon(
-            icon,
-
-            color:
-                const Color(
-                    0xFF98C13F),
-          ),
-        ),
-
-        suffixIcon:
-            suffix == null
-                ? null
-                : Padding(
-                    padding:
-                        const EdgeInsets.only(
-                            right: 20),
-
-                    child: suffix,
-                  ),
-      );
+  void _signUpWithGoogle() async {
+    setState(() => _isLoading = true);
+    try {
+      final userCredential = await _authService.signInWithGoogle();
+      if (userCredential != null) {
+        if (!mounted) return;
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const DashboardScreen()));
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString()), backgroundColor: Colors.redAccent));
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
 
   @override
   void dispose() {
-
     _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
-
     super.dispose();
   }
 }

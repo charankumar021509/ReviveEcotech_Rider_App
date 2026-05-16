@@ -11,382 +11,195 @@ class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
 
   @override
-  State<SettingsScreen> createState() =>
-      _SettingsScreenState();
+  State<SettingsScreen> createState() => _SettingsScreenState();
 }
 
-class _SettingsScreenState
-    extends State<SettingsScreen> {
-
+class _SettingsScreenState extends State<SettingsScreen> {
   String tr(String key) {
-    return AppLocalizations.of(
-      context,
-    ).translate(key);
+    return AppLocalizations.of(context).translate(key);
   }
 
   @override
   Widget build(BuildContext context) {
-
     return ValueListenableBuilder(
       valueListenable: isDarkMode,
-
       builder: (context, value, child) {
-
+        final bool isDark = value;
+        final bgColor = isDark ? const Color(0xFF0B132B) : const Color(0xFFF8FAFC);
+        
         return Scaffold(
+          backgroundColor: bgColor,
+          bottomNavigationBar: const CustomBottomNavBar(currentIndex: 2),
+          body: SafeArea(
+            child: Column(
+              children: [
+                _buildHeader(context, isDark),
+              
+                Expanded(
+                  child: SingleChildScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
+                    child: Column(
+                      children: [
+                        _buildSettingsItem(
+                          icon: Icons.group_outlined,
+                          title: tr('about_us'),
+                          isDark: isDark,
+                          onTap: () {
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => const AboutUsScreen()));
+                          },
+                        ),
+                        
+                        _buildSettingsItem(
+                          icon: Icons.headset_mic_outlined,
+                          title: tr('help_support'),
+                          isDark: isDark,
+                          onTap: () {
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => const HelpSupportScreen()));
+                          },
+                        ),
+                        
+                        _buildSettingsItem(
+                          icon: Icons.privacy_tip_outlined,
+                          title: tr('privacy_policy'),
+                          isDark: isDark,
+                          onTap: () {
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => const PrivacyPolicyScreen()));
+                          },
+                        ),
+                        
+                        _buildSettingsItem(
+                          icon: Icons.description_outlined,
+                          title: tr('terms_conditions'),
+                          isDark: isDark,
+                          onTap: () {
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => const TermsConditionsScreen()));
+                          },
+                        ),
+                        
+                        _buildSettingsItem(
+                          icon: Icons.question_answer_outlined,
+                          title: tr('faqs'),
+                          isDark: isDark,
+                          onTap: () {
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => const FAQScreen()));
+                          },
+                        ),
+                        
+                        const SizedBox(height: 10),
+                        Divider(color: isDark ? Colors.white12 : Colors.black12),
+                        const SizedBox(height: 10),
 
-          backgroundColor:
-              isDarkMode.value
-                  ? const Color(0xFF1E1E1E)
-                  : const Color(0xFFFCF3E3),
-
-          bottomNavigationBar:
-              const CustomBottomNavBar(
-            currentIndex: 2,
-          ),
-
-          body: Column(
-            children: [
-
-              _buildHeader(context),
-
-              Expanded(
-                child: SingleChildScrollView(
-
-                  padding:
-                      const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 30,
-                  ),
-
-                  child: Column(
-                    children: [
-
-                      /// ABOUT US
-                      _buildSettingsItem(
-                        icon:
-                            Icons.group_outlined,
-
-                        title:
-                            tr('about_us'),
-
-                        onTap: () {
-
-                          Navigator.push(
-                            context,
-
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  const AboutUsScreen(),
-                            ),
-                          );
-                        },
-                      ),
-
-                      /// HELP & SUPPORT
-                      _buildSettingsItem(
-                        icon: Icons
-                            .headset_mic_outlined,
-
-                        title:
-                            tr('help_support'),
-
-                        onTap: () {
-
-                          Navigator.push(
-                            context,
-
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  const HelpSupportScreen(),
-                            ),
-                          );
-                        },
-                      ),
-
-                      /// PRIVACY POLICY
-                      _buildSettingsItem(
-                        icon: Icons
-                            .privacy_tip_outlined,
-
-                        title:
-                            tr('privacy_policy'),
-
-                        onTap: () {
-
-                          Navigator.push(
-                            context,
-
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  const PrivacyPolicyScreen(),
-                            ),
-                          );
-                        },
-                      ),
-
-                      /// TERMS
-                      _buildSettingsItem(
-                        icon: Icons
-                            .description_outlined,
-
-                        title:
-                            tr('terms_conditions'),
-
-                        onTap: () {
-
-                          Navigator.push(
-                            context,
-
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  const TermsConditionsScreen(),
-                            ),
-                          );
-                        },
-                      ),
-
-                      /// FAQS
-                      _buildSettingsItem(
-                        icon: Icons
-                            .question_answer_outlined,
-
-                        title:
-                            tr('faqs'),
-
-                        onTap: () {
-
-                          Navigator.push(
-                            context,
-
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  const FAQScreen(),
-                            ),
-                          );
-                        },
-                      ),
-
-                      /// APP VERSION
-                      _buildSettingsItem(
-                        icon: Icons
-                            .file_copy_outlined,
-
-                        title:
-                            tr('app_version'),
-
-                        showArrow:
-                            false,
-
-                        trailing:
-                            const Text(
-                          '1.0.0',
-
-                          style: TextStyle(
-                            color: Color(
-                                0xFF98C13F),
-
-                            fontWeight:
-                                FontWeight
-                                    .bold,
-
-                            fontSize: 16,
-
-                            fontFamily:
-                                'RedHatDisplay',
-                          ),
+                        _buildSettingsItem(
+                          icon: Icons.history,
+                          title: tr('history'),
+                          isDark: isDark,
+                          onTap: () {
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => const OrderHistoryScreen()));
+                          },
                         ),
 
-                        onTap: () {},
-                      ),
-
-                      /// ORDER HISTORY
-                      _buildSettingsItem(
-                        icon:
-                            Icons.history,
-
-                        title:
-                            tr('history'),
-
-                        onTap: () {
-
-                          Navigator.push(
-                            context,
-
-                            MaterialPageRoute(
-                              builder:
-                                  (context) =>
-                                      const OrderHistoryScreen(),
+                        _buildSettingsItem(
+                          icon: Icons.logout_rounded,
+                          title: tr('logout'),
+                          isDark: isDark,
+                          iconColor: Colors.redAccent,
+                          showArrow: false,
+                          onTap: () {
+                            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const LoginScreen()));
+                          },
+                        ),
+                        
+                        const SizedBox(height: 20),
+                        
+                        // App Version
+                        Center(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF10B981).withAlpha(30),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(color: const Color(0xFF10B981).withAlpha(100)),
                             ),
-                          );
-                        },
-                      ),
-
-                      /// DASHBOARD
-                      _buildSettingsItem(
-                        icon:
-                            Icons.dashboard,
-
-                        title:
-                            tr('home'),
-
-                        onTap: () {
-
-                          Navigator.push(
-                            context,
-
-                            MaterialPageRoute(
-                              builder:
-                                  (context) =>
-                                      const DashboardScreen(),
+                            child: const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.new_releases_outlined, size: 16, color: Color(0xFF10B981)),
+                                SizedBox(width: 8),
+                                Text(
+                                  "App Version 1.0.0",
+                                  style: TextStyle(
+                                    color: Color(0xFF10B981),
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: 'RedHatDisplay',
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ],
                             ),
-                          );
-                        },
-                      ),
-
-                      /// PROFILE
-                      _buildSettingsItem(
-                        icon:
-                            Icons.person,
-
-                        title:
-                            tr('profile'),
-
-                        onTap: () {
-
-                          Navigator.push(
-                            context,
-
-                            MaterialPageRoute(
-                              builder:
-                                  (context) =>
-                                      const ProfileSettingsScreen(),
-                            ),
-                          );
-                        },
-                      ),
-
-                      /// LOGOUT
-                      _buildSettingsItem(
-                        icon:
-                            Icons.logout,
-
-                        title:
-                            tr('logout'),
-
-                        iconColor:
-                            Colors.red,
-
-                        showArrow:
-                            false,
-
-                        onTap: () {
-
-                          Navigator.pushReplacement(
-                            context,
-
-                            MaterialPageRoute(
-                              builder:
-                                  (context) =>
-                                      const LoginScreen(),
-                            ),
-                          );
-                        },
-                      ),
-
-                      const SizedBox(
-                          height: 20),
-                    ],
+                          ),
+                        ),
+                        const SizedBox(height: 30),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },
     );
   }
 
-  Widget _buildHeader(
-      BuildContext context) {
-
+  Widget _buildHeader(BuildContext context, bool isDark) {
     return Container(
       width: double.infinity,
-
-      decoration: const BoxDecoration(
-        color: Color(0xFF003856),
-
-        borderRadius:
-            BorderRadius.only(
-          bottomLeft:
-              Radius.circular(50),
-          bottomRight:
-              Radius.circular(50),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF0B132B) : const Color(0xFF003856),
+        borderRadius: const BorderRadius.only(
+          bottomLeft: Radius.circular(35),
+          bottomRight: Radius.circular(35),
         ),
+        boxShadow: [
+          BoxShadow(
+            color: isDark ? Colors.black.withAlpha(40) : const Color(0xFF003856).withAlpha(40),
+            blurRadius: 20,
+            offset: const Offset(0, 5),
+          )
+        ],
       ),
-
-      padding:
-          const EdgeInsets.fromLTRB(
-              20, 60, 20, 40),
-
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 25),
       child: Row(
-        mainAxisAlignment:
-            MainAxisAlignment
-                .spaceBetween,
-
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-
           IconButton(
-            icon: const Icon(
-              Icons.arrow_back,
-              color: Colors.white,
-              size: 30,
-            ),
-
-            onPressed: () =>
-                Navigator.pop(
-                    context),
+            icon: const Icon(Icons.arrow_back, color: Colors.white, size: 28),
+            onPressed: () => Navigator.pop(context),
           ),
-
           Text(
             tr('settings'),
-
             style: const TextStyle(
               color: Colors.white,
-              fontSize: 24,
-              fontWeight:
-                  FontWeight.bold,
-
-              fontFamily:
-                  'RedHatDisplay',
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              fontFamily: 'RedHatDisplay',
             ),
           ),
-
           GestureDetector(
             onTap: () {
-
-              Navigator.push(
-                context,
-
-                MaterialPageRoute(
-                  builder: (context) =>
-                      const ProfileSettingsScreen(),
-                ),
-              );
+              Navigator.push(context, MaterialPageRoute(builder: (context) => const ProfileSettingsScreen()));
             },
-
-            child:
-                CircleAvatar(
-              radius: 25,
-
-              backgroundColor:
-                  const Color(
-                      0xFFFCF3E3),
-
-              child: const Icon(
-                Icons.person,
-                size: 30,
-                color:
-                    Color(0xFF003856),
+            child: Container(
+              padding: const EdgeInsets.all(2),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: const Color(0xFF10B981).withAlpha(100), width: 2),
+              ),
+              child: CircleAvatar(
+                radius: 22,
+                backgroundColor: isDark ? const Color(0xFF162032) : const Color(0xFFFCF3E3),
+                child: Icon(Icons.person, size: 28, color: isDark ? Colors.white : const Color(0xFF003856)),
               ),
             ),
           ),
@@ -398,765 +211,541 @@ class _SettingsScreenState
   Widget _buildSettingsItem({
     required IconData icon,
     required String title,
-    Color iconColor =
-        const Color(0xFF003856),
+    required bool isDark,
+    Color? iconColor,
     bool showArrow = true,
-    Widget? trailing,
     required VoidCallback onTap,
   }) {
-
+    final effectiveIconColor = iconColor ?? const Color(0xFF10B981);
+    
     return Container(
-      margin:
-          const EdgeInsets.only(
-              bottom: 15),
-
+      margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-
-        color:
-            isDarkMode.value
-                ? const Color(
-                    0xFF2A2A2A)
-                : Colors.white,
-
-        borderRadius:
-            BorderRadius.circular(
-                20),
-
+        color: isDark ? const Color(0xFF162032) : Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: isDark ? Colors.white12 : Colors.transparent),
         boxShadow: [
           BoxShadow(
-            color: Colors.black
-                .withOpacity(0.05),
-
-            blurRadius: 10,
-
-            offset:
-                const Offset(0, 4),
+            color: Colors.black.withAlpha(15),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
           ),
         ],
       ),
-
-      child: ListTile(
-        onTap: onTap,
-
-        contentPadding:
-            const EdgeInsets.symmetric(
-          horizontal: 20,
-          vertical: 8,
-        ),
-
-        leading: Icon(
-          icon,
-          color: iconColor,
-          size: 32,
-        ),
-
-        title: Text(
-          title,
-
-          style: TextStyle(
-            fontSize: 18,
-
-            fontWeight:
-                FontWeight.bold,
-
-            color:
-                isDarkMode.value
-                    ? Colors.white
-                    : const Color(
-                        0xFF003856),
-
-            fontFamily:
-                'RedHatDisplay',
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(20),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: effectiveIconColor.withAlpha(isDark ? 30 : 20),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(icon, color: effectiveIconColor, size: 22),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: isDark ? Colors.white : const Color(0xFF003856),
+                      fontFamily: 'RedHatDisplay',
+                    ),
+                  ),
+                ),
+                if (showArrow)
+                  Icon(
+                    Icons.chevron_right_rounded,
+                    color: isDark ? Colors.white30 : Colors.black26,
+                    size: 26,
+                  ),
+              ],
+            ),
           ),
         ),
-
-        trailing: trailing ??
-            (showArrow
-                ? const Icon(
-                    Icons.chevron_right,
-
-                    color: Color(
-                        0xFF98C13F),
-
-                    size: 30,
-                  )
-                : null),
       ),
     );
   }
 }
 
-/// ================= ABOUT US SCREEN =================
-class AboutUsScreen
-    extends StatelessWidget {
+/// ================= COMMON UI HELPERS FOR SUB-SCREENS =================
+Widget _topHeader(BuildContext context, String title, bool isDark) {
+  return Container(
+    width: double.infinity,
+    decoration: BoxDecoration(
+      color: isDark ? const Color(0xFF0B132B) : const Color(0xFF003856),
+      borderRadius: const BorderRadius.only(
+        bottomLeft: Radius.circular(35),
+        bottomRight: Radius.circular(35),
+      ),
+      boxShadow: [
+        BoxShadow(
+          color: isDark ? Colors.black.withAlpha(40) : const Color(0xFF003856).withAlpha(40),
+          blurRadius: 20,
+          offset: const Offset(0, 5),
+        )
+      ],
+    ),
+    padding: const EdgeInsets.fromLTRB(20, 60, 20, 30),
+    child: Row(
+      children: [
+        IconButton(
+          onPressed: () => Navigator.pop(context),
+          icon: const Icon(Icons.arrow_back, color: Colors.white, size: 28),
+        ),
+        Expanded(
+          child: Center(
+            child: Text(
+              title,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'RedHatDisplay',
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 44), // To balance the back button
+      ],
+    ),
+  );
+}
 
-  const AboutUsScreen({
-    super.key,
-  });
+Widget _infoCard({required String title, required String content, required bool isDark}) {
+  return Container(
+    margin: const EdgeInsets.symmetric(horizontal: 20),
+    padding: const EdgeInsets.all(24),
+    decoration: BoxDecoration(
+      color: isDark ? const Color(0xFF162032) : Colors.white,
+      borderRadius: BorderRadius.circular(24),
+      border: Border.all(color: isDark ? Colors.white12 : Colors.transparent),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withAlpha(15),
+          blurRadius: 15,
+          offset: const Offset(0, 5),
+        ),
+      ],
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            color: isDark ? Colors.white : const Color(0xFF003856),
+            fontFamily: 'RedHatDisplay',
+          ),
+        ),
+        const SizedBox(height: 16),
+        Text(
+          content,
+          style: TextStyle(
+            fontSize: 16,
+            height: 1.6,
+            color: isDark ? Colors.white70 : Colors.black87,
+            fontFamily: 'RedHatDisplay',
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+Widget _darkCard(bool isDark) {
+  return Container(
+    margin: const EdgeInsets.symmetric(horizontal: 20),
+    padding: const EdgeInsets.all(24),
+    decoration: BoxDecoration(
+      color: isDark ? const Color(0xFF0B132B) : const Color(0xFF003856),
+      borderRadius: BorderRadius.circular(24),
+      border: isDark ? Border.all(color: Colors.white12) : null,
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withAlpha(20),
+          blurRadius: 15,
+          offset: const Offset(0, 8),
+        ),
+      ],
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          "Why Choose Us?",
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            fontFamily: 'RedHatDisplay',
+          ),
+        ),
+        const SizedBox(height: 20),
+        _featureItem(Icons.shield_outlined, "Trusted & Reliable", "Verified agents at your doorstep."),
+        const SizedBox(height: 16),
+        _featureItem(Icons.flash_on_rounded, "Fast Service", "Quick pickup within scheduled slots."),
+      ],
+    ),
+  );
+}
+
+Widget _featureItem(IconData icon, String title, String subtitle) {
+  return Row(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: const Color(0xFF10B981).withAlpha(40),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(icon, color: const Color(0xFF10B981), size: 20),
+      ),
+      const SizedBox(width: 16),
+      Expanded(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold, fontFamily: 'RedHatDisplay'),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              subtitle,
+              style: const TextStyle(color: Colors.white70, fontSize: 14, fontFamily: 'RedHatDisplay'),
+            ),
+          ],
+        ),
+      ),
+    ],
+  );
+}
+
+Widget _supportTile(IconData icon, String title, String subtitle, bool isDark) {
+  return Container(
+    margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+    decoration: BoxDecoration(
+      color: isDark ? const Color(0xFF162032) : Colors.white,
+      borderRadius: BorderRadius.circular(20),
+      border: Border.all(color: isDark ? Colors.white12 : Colors.transparent),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withAlpha(10),
+          blurRadius: 10,
+          offset: const Offset(0, 4),
+        ),
+      ],
+    ),
+    child: ListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      leading: Container(
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: const Color(0xFF10B981).withAlpha(isDark ? 30 : 20),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(icon, color: const Color(0xFF10B981)),
+      ),
+      title: Text(
+        title,
+        style: TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+          color: isDark ? Colors.white : const Color(0xFF003856),
+          fontFamily: 'RedHatDisplay',
+        ),
+      ),
+      subtitle: Text(
+        subtitle,
+        style: TextStyle(
+          fontSize: 14,
+          color: isDark ? Colors.white60 : Colors.grey.shade600,
+          fontFamily: 'RedHatDisplay',
+        ),
+      ),
+    ),
+  );
+}
+
+Widget _faqTile(String question, String answer, bool isDark) {
+  return Container(
+    margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+    decoration: BoxDecoration(
+      color: isDark ? const Color(0xFF162032) : Colors.white,
+      borderRadius: BorderRadius.circular(20),
+      border: Border.all(color: isDark ? Colors.white12 : Colors.transparent),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withAlpha(10),
+          blurRadius: 10,
+          offset: const Offset(0, 4),
+        ),
+      ],
+    ),
+    child: Theme(
+      data: ThemeData(dividerColor: Colors.transparent),
+      child: ExpansionTile(
+        iconColor: const Color(0xFF10B981),
+        collapsedIconColor: isDark ? Colors.white54 : Colors.black54,
+        title: Text(
+          question,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: isDark ? Colors.white : const Color(0xFF003856),
+            fontFamily: 'RedHatDisplay',
+          ),
+        ),
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+            child: Text(
+              answer,
+              style: TextStyle(
+                fontSize: 15,
+                color: isDark ? Colors.white70 : Colors.grey.shade700,
+                height: 1.5,
+                fontFamily: 'RedHatDisplay',
+              ),
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+/// ================= ABOUT US SCREEN =================
+class AboutUsScreen extends StatelessWidget {
+  const AboutUsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-
-    return Scaffold(
-
-      backgroundColor:
-          const Color(
-              0xFFFCF3E3),
-
-      body: SafeArea(
-        child: SingleChildScrollView(
-
-          child: Column(
+    return ValueListenableBuilder(
+      valueListenable: isDarkMode,
+      builder: (context, value, child) {
+        final isDark = value;
+        return Scaffold(
+          backgroundColor: isDark ? const Color(0xFF0B132B) : const Color(0xFFF8FAFC),
+          body: Column(
             children: [
-
-              _topHeader(
-                context,
-                'About Us',
-              ),
-
-              const SizedBox(
-                  height: 30),
-
-              CircleAvatar(
-                radius: 80,
-
-                backgroundColor:
-                    Colors.white,
-
-                child: const Icon(
-                  Icons.recycling,
-                  size: 80,
-                  color:
-                      Color(0xFF98C13F),
+              _topHeader(context, 'About Us', isDark),
+              Expanded(
+                child: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 40),
+                      Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: isDark ? const Color(0xFF162032) : Colors.white,
+                          boxShadow: [BoxShadow(color: Colors.black.withAlpha(10), blurRadius: 20)],
+                        ),
+                        child: const Icon(Icons.recycling, size: 80, color: Color(0xFF10B981)),
+                      ),
+                      const SizedBox(height: 24),
+                      Text(
+                        "Revive EcoTech",
+                        style: TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.w900,
+                          color: isDark ? Colors.white : const Color(0xFF003856),
+                          fontFamily: 'RedHatDisplay',
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        "Earn Money While Recycling",
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: isDark ? Colors.white54 : Colors.grey.shade600,
+                          fontFamily: 'RedHatDisplay',
+                        ),
+                      ),
+                      const SizedBox(height: 40),
+                      _infoCard(
+                        title: "Our Mission",
+                        content: "Revive is the ultimate solution for eco-conscious families looking to make a positive impact on the environment while earning money through convenient scrap recycling services.",
+                        isDark: isDark,
+                      ),
+                      const SizedBox(height: 24),
+                      _darkCard(isDark),
+                      const SizedBox(height: 40),
+                      Text("© 2026 Revive Ecotech Ltd", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: isDark ? Colors.white54 : Colors.black54)),
+                      const SizedBox(height: 40),
+                    ],
+                  ),
                 ),
               ),
-
-              const SizedBox(
-                  height: 20),
-
-              const Text(
-                "Revive Eco Tech",
-
-                style: TextStyle(
-                  fontSize: 34,
-                  fontWeight:
-                      FontWeight.bold,
-
-                  color:
-                      Color(0xFF003856),
-                ),
-              ),
-
-              const SizedBox(
-                  height: 10),
-
-              const Text(
-                "Earn Money While Recycling",
-
-                style: TextStyle(
-                  fontSize: 20,
-                  color: Colors.grey,
-                ),
-              ),
-
-              const SizedBox(
-                  height: 30),
-
-              _infoCard(
-                title: "Our Mission",
-
-                content:
-                    "Revive is the ultimate solution for eco-conscious families looking to make a positive impact on the environment while earning money through convenient scrap recycling services.",
-              ),
-
-              const SizedBox(
-                  height: 25),
-
-              _darkCard(),
-
-              const SizedBox(
-                  height: 30),
-
-              const Text(
-                "© 2025 Revive Ecotech Ltd",
-
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight:
-                      FontWeight.bold,
-
-                  color:
-                      Color(0xFF003856),
-                ),
-              ),
-
-              const SizedBox(
-                  height: 8),
-
-              const Text(
-                "Version 1.0.0",
-
-                style: TextStyle(
-                  fontSize: 18,
-                  color: Colors.grey,
-                ),
-              ),
-
-              const SizedBox(
-                  height: 40),
             ],
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
 
 /// ================= HELP SUPPORT =================
-class HelpSupportScreen
-    extends StatelessWidget {
-
-  const HelpSupportScreen({
-    super.key,
-  });
+class HelpSupportScreen extends StatelessWidget {
+  const HelpSupportScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-
-    return Scaffold(
-
-      backgroundColor:
-          const Color(
-              0xFFFCF3E3),
-
-      body: SafeArea(
-        child: SingleChildScrollView(
-
-          child: Column(
+    return ValueListenableBuilder(
+      valueListenable: isDarkMode,
+      builder: (context, value, child) {
+        final isDark = value;
+        return Scaffold(
+          backgroundColor: isDark ? const Color(0xFF0B132B) : const Color(0xFFF8FAFC),
+          body: Column(
             children: [
-
-              _topHeader(
-                context,
-                "Help & Support",
-              ),
-
-              const SizedBox(
-                  height: 30),
-
-              _supportTile(
-                Icons.call,
-                "Customer Care",
-                "6304218355",
-              ),
-
-              _supportTile(
-                Icons.email,
-                "Email Support",
-                "reviveecotech@gmail.com",
-              ),
-
-              _supportTile(
-                Icons.help_outline,
-                "FAQ Support",
-                "Common rider questions",
-              ),
-
-              _supportTile(
-                Icons.location_on,
-                "Pickup Support",
-                "Navigation & pickup help",
+              _topHeader(context, "Help & Support", isDark),
+              Expanded(
+                child: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 30),
+                      _supportTile(Icons.call_outlined, "Customer Care", "6304218355", isDark),
+                      _supportTile(Icons.email_outlined, "Email Support", "reviveecotech@gmail.com", isDark),
+                      _supportTile(Icons.help_outline, "FAQ Support", "Common rider questions", isDark),
+                      _supportTile(Icons.location_on_outlined, "Pickup Support", "Navigation & pickup help", isDark),
+                    ],
+                  ),
+                ),
               ),
             ],
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
 
 /// ================= PRIVACY POLICY =================
-class PrivacyPolicyScreen
-    extends StatelessWidget {
-
-  const PrivacyPolicyScreen({
-    super.key,
-  });
+class PrivacyPolicyScreen extends StatelessWidget {
+  const PrivacyPolicyScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-
-    return Scaffold(
-
-      backgroundColor:
-          const Color(
-              0xFFFCF3E3),
-
-      body: SafeArea(
-        child: SingleChildScrollView(
-
-          child: Column(
+    return ValueListenableBuilder(
+      valueListenable: isDarkMode,
+      builder: (context, value, child) {
+        final isDark = value;
+        return Scaffold(
+          backgroundColor: isDark ? const Color(0xFF0B132B) : const Color(0xFFF8FAFC),
+          body: Column(
             children: [
-
-              _topHeader(
-                context,
-                "Privacy Policy",
-              ),
-
-              const SizedBox(
-                  height: 30),
-
-              _infoCard(
-                title:
-                    "Privacy Information",
-
-                content:
-                    "ReviveEcoTech Rider securely stores rider account information, pickup locations, and order details to provide smooth recycling pickup operations.\n\nLocation access is used only for navigation and active pickup services.\n\nYour information is protected and never shared with unauthorized third parties.",
+              _topHeader(context, "Privacy Policy", isDark),
+              Expanded(
+                child: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 30),
+                      _infoCard(
+                        title: "Privacy Information",
+                        content: "ReviveEcoTech Rider securely stores rider account information, pickup locations, and order details to provide smooth recycling pickup operations.\n\nLocation access is used only for navigation and active pickup services.\n\nYour information is protected and never shared with unauthorized third parties.",
+                        isDark: isDark,
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ],
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
 
 /// ================= TERMS =================
-class TermsConditionsScreen
-    extends StatelessWidget {
-
-  const TermsConditionsScreen({
-    super.key,
-  });
+class TermsConditionsScreen extends StatelessWidget {
+  const TermsConditionsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-
-    return Scaffold(
-
-      backgroundColor:
-          const Color(
-              0xFFFCF3E3),
-
-      body: SafeArea(
-        child: SingleChildScrollView(
-
-          child: Column(
+    return ValueListenableBuilder(
+      valueListenable: isDarkMode,
+      builder: (context, value, child) {
+        final isDark = value;
+        return Scaffold(
+          backgroundColor: isDark ? const Color(0xFF0B132B) : const Color(0xFFF8FAFC),
+          body: Column(
             children: [
-
-              _topHeader(
-                context,
-                "Terms & Conditions",
-              ),
-
-              const SizedBox(
-                  height: 30),
-
-              _infoCard(
-                title:
-                    "Terms & Conditions",
-
-                content:
-                    "Riders must complete pickups responsibly, verify OTPs before completion, and follow company guidelines.\n\nAny misuse, fake completion, or policy violations may result in account suspension.\n\nBy using ReviveEcoTech Rider, you agree to follow all operational and safety policies.",
+              _topHeader(context, "Terms & Conditions", isDark),
+              Expanded(
+                child: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 30),
+                      _infoCard(
+                        title: "Terms & Conditions",
+                        content: "Riders must complete pickups responsibly, verify OTPs before completion, and follow company guidelines.\n\nAny misuse, fake completion, or policy violations may result in account suspension.\n\nBy using ReviveEcoTech Rider, you agree to follow all operational and safety policies.",
+                        isDark: isDark,
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ],
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
 
 /// ================= FAQ =================
-class FAQScreen
-    extends StatelessWidget {
-
-  const FAQScreen({
-    super.key,
-  });
+class FAQScreen extends StatelessWidget {
+  const FAQScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-
-    return Scaffold(
-
-      backgroundColor:
-          const Color(
-              0xFFFCF3E3),
-
-      body: SafeArea(
-        child: SingleChildScrollView(
-
-          child: Column(
+    return ValueListenableBuilder(
+      valueListenable: isDarkMode,
+      builder: (context, value, child) {
+        final isDark = value;
+        return Scaffold(
+          backgroundColor: isDark ? const Color(0xFF0B132B) : const Color(0xFFF8FAFC),
+          body: Column(
             children: [
-
-              _topHeader(
-                context,
-                "FAQs",
-              ),
-
-              const SizedBox(
-                  height: 20),
-
-              _faqTile(
-                "How do I start a pickup?",
-                "Accept the order and wait until pickup time becomes active.",
-              ),
-
-              _faqTile(
-                "Why is Start Pickup disabled?",
-                "The pickup time slot has not started yet.",
-              ),
-
-              _faqTile(
-                "How do I complete a pickup?",
-                "Enter the customer OTP inside Order Details to complete the order.",
-              ),
-
-              _faqTile(
-                "What if OTP is wrong?",
-                "The order cannot be completed until correct OTP is entered.",
-              ),
-
-              _faqTile(
-                "Can I call the customer?",
-                "Yes, use the Call Customer button inside Order Details.",
+              _topHeader(context, "FAQs", isDark),
+              Expanded(
+                child: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 20),
+                      _faqTile("How do I start a pickup?", "Accept the order and wait until pickup time becomes active.", isDark),
+                      _faqTile("Why is Start Pickup disabled?", "The pickup time slot has not started yet.", isDark),
+                      _faqTile("How do I complete a pickup?", "Enter the customer OTP inside Order Details to complete the order.", isDark),
+                      _faqTile("What if OTP is wrong?", "The order cannot be completed until the correct OTP is entered.", isDark),
+                      _faqTile("Can I call the customer?", "Yes, use the Call Customer button inside Order Details.", isDark),
+                    ],
+                  ),
+                ),
               ),
             ],
           ),
-        ),
-      ),
+        );
+      },
     );
   }
-}
-
-/// ================= COMMON HEADER =================
-Widget _topHeader(
-  BuildContext context,
-  String title,
-) {
-
-  return Container(
-    width: double.infinity,
-
-    decoration: const BoxDecoration(
-      color: Color(0xFF003856),
-
-      borderRadius:
-          BorderRadius.only(
-        bottomLeft:
-            Radius.circular(50),
-
-        bottomRight:
-            Radius.circular(50),
-      ),
-    ),
-
-    padding:
-        const EdgeInsets.fromLTRB(
-            20, 40, 20, 35),
-
-    child: Row(
-      children: [
-
-        IconButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-
-          icon: const Icon(
-            Icons.arrow_back,
-            color: Colors.white,
-            size: 30,
-          ),
-        ),
-
-        Expanded(
-          child: Center(
-            child: Text(
-              title,
-
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 28,
-                fontWeight:
-                    FontWeight.bold,
-              ),
-            ),
-          ),
-        ),
-
-        const SizedBox(width: 40),
-      ],
-    ),
-  );
-}
-
-/// ================= INFO CARD =================
-Widget _infoCard({
-  required String title,
-  required String content,
-}) {
-
-  return Container(
-    margin:
-        const EdgeInsets.symmetric(
-      horizontal: 20,
-    ),
-
-    padding:
-        const EdgeInsets.all(25),
-
-    decoration: BoxDecoration(
-      color: Colors.white,
-
-      borderRadius:
-          BorderRadius.circular(30),
-    ),
-
-    child: Column(
-      crossAxisAlignment:
-          CrossAxisAlignment.start,
-
-      children: [
-
-        Text(
-          title,
-
-          style: const TextStyle(
-            fontSize: 28,
-            fontWeight:
-                FontWeight.bold,
-
-            color:
-                Color(0xFF003856),
-          ),
-        ),
-
-        const SizedBox(height: 20),
-
-        Text(
-          content,
-
-          style: const TextStyle(
-            fontSize: 20,
-            height: 1.6,
-            color: Colors.grey,
-          ),
-        ),
-      ],
-    ),
-  );
-}
-
-/// ================= DARK CARD =================
-Widget _darkCard() {
-
-  return Container(
-    margin:
-        const EdgeInsets.symmetric(
-      horizontal: 20,
-    ),
-
-    padding:
-        const EdgeInsets.all(25),
-
-    decoration: BoxDecoration(
-      color: const Color(0xFF003856),
-
-      borderRadius:
-          BorderRadius.circular(30),
-    ),
-
-    child: const Column(
-      crossAxisAlignment:
-          CrossAxisAlignment.start,
-
-      children: [
-
-        Text(
-          "Why Choose Us?",
-
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 30,
-            fontWeight:
-                FontWeight.bold,
-          ),
-        ),
-
-        SizedBox(height: 25),
-
-        ListTile(
-          leading: Icon(
-            Icons.shield_outlined,
-            color: Color(0xFF98C13F),
-          ),
-
-          title: Text(
-            "Trusted & Reliable",
-
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 24,
-              fontWeight:
-                  FontWeight.bold,
-            ),
-          ),
-
-          subtitle: Text(
-            "Verified agents at your doorstep.",
-
-            style: TextStyle(
-              color: Colors.white70,
-              fontSize: 18,
-            ),
-          ),
-        ),
-
-        ListTile(
-          leading: Icon(
-            Icons.flash_on,
-            color: Color(0xFF98C13F),
-          ),
-
-          title: Text(
-            "Fast Service",
-
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 24,
-              fontWeight:
-                  FontWeight.bold,
-            ),
-          ),
-
-          subtitle: Text(
-            "Quick pickup within scheduled slots.",
-
-            style: TextStyle(
-              color: Colors.white70,
-              fontSize: 18,
-            ),
-          ),
-        ),
-      ],
-    ),
-  );
-}
-
-/// ================= SUPPORT TILE =================
-Widget _supportTile(
-  IconData icon,
-  String title,
-  String subtitle,
-) {
-
-  return Container(
-    margin:
-        const EdgeInsets.symmetric(
-      horizontal: 20,
-      vertical: 10,
-    ),
-
-    decoration: BoxDecoration(
-      color: Colors.white,
-
-      borderRadius:
-          BorderRadius.circular(25),
-    ),
-
-    child: ListTile(
-
-      leading: CircleAvatar(
-        backgroundColor:
-            const Color(
-                0xFFFCF3E3),
-
-        child: Icon(
-          icon,
-          color:
-              const Color(
-                  0xFF003856),
-        ),
-      ),
-
-      title: Text(
-        title,
-
-        style: const TextStyle(
-          fontSize: 22,
-          fontWeight:
-              FontWeight.bold,
-
-          color:
-              Color(0xFF003856),
-        ),
-      ),
-
-      subtitle: Text(
-        subtitle,
-
-        style: const TextStyle(
-          fontSize: 18,
-          color: Colors.grey,
-        ),
-      ),
-    ),
-  );
-}
-
-/// ================= FAQ TILE =================
-Widget _faqTile(
-  String question,
-  String answer,
-) {
-
-  return Container(
-    margin:
-        const EdgeInsets.symmetric(
-      horizontal: 20,
-      vertical: 10,
-    ),
-
-    decoration: BoxDecoration(
-      color: Colors.white,
-
-      borderRadius:
-          BorderRadius.circular(25),
-    ),
-
-    child: ExpansionTile(
-
-      title: Text(
-        question,
-
-        style: const TextStyle(
-          fontSize: 20,
-          fontWeight:
-              FontWeight.bold,
-
-          color:
-              Color(0xFF003856),
-        ),
-      ),
-
-      children: [
-
-        Padding(
-          padding:
-              const EdgeInsets.all(20),
-
-          child: Text(
-            answer,
-
-            style: const TextStyle(
-              fontSize: 18,
-              color: Colors.grey,
-              height: 1.5,
-            ),
-          ),
-        ),
-      ],
-    ),
-  );
 }

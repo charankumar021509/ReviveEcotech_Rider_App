@@ -1,146 +1,88 @@
 import 'package:flutter/material.dart';
-
 import '../screens/orders_screen.dart';
 import '../screens/order_history_screen.dart';
 import '../screens/settings_screen.dart';
 
-class CustomBottomNavBar
-    extends StatelessWidget {
-
+class CustomBottomNavBar extends StatelessWidget {
   final int currentIndex;
 
   const CustomBottomNavBar({
-
     super.key,
-
     required this.currentIndex,
   });
 
   @override
   Widget build(BuildContext context) {
+    const navy = Color(0xFF0B132B);
 
-    return Padding(
-
-      padding: const EdgeInsets.only(
-
-        left: 20,
-        right: 20,
-        bottom: 15,
-      ),
-
-      child: Container(
-
-        decoration: BoxDecoration(
-
-          color: Colors.black,
-
-          borderRadius:
-              BorderRadius.circular(40),
-
-          boxShadow: const [
-
-            BoxShadow(
-
-              color: Colors.black26,
-
-              blurRadius: 10,
-
-              offset: Offset(0, 5),
-            ),
-          ],
+    return Container(
+      decoration: BoxDecoration(
+        color: navy,
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(30),
+          topRight: Radius.circular(30),
         ),
-
-        child: ClipRRect(
-
-          borderRadius:
-              BorderRadius.circular(40),
-
-          child: BottomNavigationBar(
-
-            currentIndex:
-                currentIndex,
-
-           backgroundColor:
-               const Color(0xFF003856),
-
-            selectedItemColor:
-                Colors.cyanAccent,
-
-            unselectedItemColor:
-                Colors.grey,
-
-            type:
-                BottomNavigationBarType.fixed,
-
-            onTap: (index) {
-
-              if (index == 0) {
-
-                Navigator.pushReplacement(
-
-                  context,
-
-                  MaterialPageRoute(
-
-                    builder: (_) =>
-                        const OrdersScreen(),
-                  ),
-                );
-              }
-
-              if (index == 1) {
-
-                Navigator.pushReplacement(
-
-                  context,
-
-                  MaterialPageRoute(
-
-                    builder: (_) =>
-                        const OrderHistoryScreen(),
-                  ),
-                );
-              }
-
-              if (index == 2) {
-
-                Navigator.pushReplacement(
-
-                  context,
-
-                  MaterialPageRoute(
-
-                    builder: (_) =>
-                        const SettingsScreen(),
-                  ),
-                );
-              }
-            },
-
-            items: const [
-
-              BottomNavigationBarItem(
-
-                icon: Icon(Icons.home),
-
-                label: 'order',
-              ),
-
-              BottomNavigationBarItem(
-
-                icon: Icon(Icons.history),
-
-                label: 'History',
-              ),
-
-              BottomNavigationBarItem(
-
-                icon: Icon(Icons.settings),
-
-                label: 'Settings',
-              ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withAlpha(80),
+            blurRadius: 15,
+            offset: const Offset(0, -5),
+          ),
+        ],
+      ),
+      child: SafeArea(
+        top: false,
+        child: Container(
+          height: 70,
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildItem(context, 0, Icons.receipt_long_rounded, "Orders", const OrdersScreen()),
+              _buildItem(context, 1, Icons.history_rounded, "History", const OrderHistoryScreen()),
+              _buildItem(context, 2, Icons.settings_rounded, "Settings", const SettingsScreen()),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildItem(BuildContext context, int index, IconData icon, String label, Widget screen) {
+    final bool isActive = currentIndex == index;
+    const green = Color(0xFF10B981);
+
+    return Expanded(
+      child: InkWell(
+        onTap: () {
+          if (isActive) return;
+          Navigator.pushReplacement(
+            context,
+            PageRouteBuilder(
+              pageBuilder: (context, anim1, anim2) => screen,
+              transitionsBuilder: (context, anim1, anim2, child) => FadeTransition(opacity: anim1, child: child),
+            ),
+          );
+        },
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              color: isActive ? green : Colors.white38,
+              size: 26,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: TextStyle(
+                color: isActive ? green : Colors.white38,
+                fontSize: 10,
+                fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+                fontFamily: 'RedHatDisplay',
+              ),
+            ),
+          ],
         ),
       ),
     );
