@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'order_address_screen.dart';
+import 'theme_controller.dart';
+
 class ScheduleScreen extends StatefulWidget {
   const ScheduleScreen({super.key});
 
@@ -39,221 +41,241 @@ class _ScheduleScreenState
   @override
   Widget build(BuildContext context) {
 
-    return Scaffold(
-      backgroundColor:
-          const Color(0xFFFCF3E3),
+    return ValueListenableBuilder(
+      valueListenable: isDarkMode,
 
-      appBar: AppBar(
-        backgroundColor:
-            const Color(0xFF003856),
+      builder: (context, value, child) {
 
-        elevation: 0,
-        centerTitle: true,
+        return Scaffold(
 
-        title: const Text(
-          "Order Status",
+          backgroundColor:
+              isDarkMode.value
+                  ? const Color(0xFF1E1E1E)
+                  : const Color(0xFFFCF3E3),
 
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight:
-                FontWeight.bold,
+          appBar: AppBar(
+            backgroundColor:
+                const Color(0xFF003856),
 
-            fontFamily:
-                'RedHatDisplay',
+            elevation: 0,
+            centerTitle: true,
+
+            title: const Text(
+              "Order Status",
+
+              style: TextStyle(
+                color: Colors.white,
+
+                fontWeight:
+                    FontWeight.bold,
+
+                fontFamily:
+                    'RedHatDisplay',
+              ),
+            ),
           ),
-        ),
-      ),
 
-      body: Padding(
-        padding:
-            const EdgeInsets.all(20),
+          body: Padding(
+            padding:
+                const EdgeInsets.all(20),
 
-        child: Column(
+            child: Column(
 
-          children: [
+              children: [
 
-            Expanded(
-              child: ListView.builder(
+                Expanded(
+                  child: ListView.builder(
 
-                itemCount: steps.length,
+                    itemCount: steps.length,
 
-                itemBuilder:
-                    (context, index) {
+                    itemBuilder:
+                        (context, index) {
 
-                  final step =
-                      steps[index];
+                      final step =
+                          steps[index];
 
-                  final isCompleted =
-                      index <= currentStep;
+                      final isCompleted =
+                          index <= currentStep;
 
-                  return Row(
-                    crossAxisAlignment:
-                        CrossAxisAlignment
-                            .start,
+                      return Row(
+                        crossAxisAlignment:
+                            CrossAxisAlignment
+                                .start,
 
-                    children: [
-
-                      Column(
                         children: [
 
-                          Container(
-                            width: 40,
-                            height: 40,
+                          Column(
+                            children: [
 
-                            decoration:
-                                BoxDecoration(
-                              color:
-                                  isCompleted
-                                      ? Colors
-                                          .green
-                                      : Colors
-                                          .grey,
+                              Container(
+                                width: 40,
+                                height: 40,
 
-                              shape: BoxShape
-                                  .circle,
-                            ),
+                                decoration:
+                                    BoxDecoration(
+                                  color:
+                                      isCompleted
+                                          ? Colors
+                                              .green
+                                          : Colors
+                                              .grey,
 
-                            child: Icon(
-                              step['icon'],
+                                  shape: BoxShape
+                                      .circle,
+                                ),
 
-                              color:
-                                  Colors.white,
-                            ),
+                                child: Icon(
+                                  step['icon'],
+
+                                  color:
+                                      Colors.white,
+                                ),
+                              ),
+
+                              if (index !=
+                                  steps.length -
+                                      1)
+
+                                Container(
+                                  width: 4,
+                                  height: 70,
+
+                                  color:
+                                      isCompleted
+                                          ? Colors
+                                              .green
+                                          : Colors
+                                              .grey
+                                              .shade400,
+                                ),
+                            ],
                           ),
 
-                          if (index !=
-                              steps.length -
-                                  1)
+                          const SizedBox(
+                              width: 20),
 
-                            Container(
-                              width: 4,
-                              height: 70,
+                          Expanded(
+                            child: Container(
 
-                              color:
-                                  isCompleted
-                                      ? Colors
-                                          .green
-                                      : Colors
-                                          .grey
-                                          .shade400,
+                              margin:
+                                  const EdgeInsets.only(
+                                      bottom:
+                                          20),
+
+                              padding:
+                                  const EdgeInsets
+                                      .all(20),
+
+                              decoration:
+                                  BoxDecoration(
+
+                                color:
+                                    isDarkMode.value
+                                        ? const Color(
+                                            0xFF2A2A2A)
+                                        : const Color(
+                                            0xC8A6CB4E),
+
+                                borderRadius:
+                                    BorderRadius
+                                        .circular(
+                                            20),
+                              ),
+
+                              child: Text(
+                                step['title'],
+
+                                style:
+                                    TextStyle(
+                                  fontSize:
+                                      20,
+
+                                  fontWeight:
+                                      FontWeight
+                                          .bold,
+
+                                  color:
+                                      isDarkMode.value
+                                          ? Colors.white
+                                          : Colors.black,
+
+                                  fontFamily:
+                                      'RedHatDisplay',
+                                ),
+                              ),
                             ),
+                          ),
                         ],
-                      ),
-
-                      const SizedBox(
-                          width: 20),
-
-                      Expanded(
-                        child: Container(
-
-                          margin:
-                              const EdgeInsets.only(
-                                  bottom:
-                                      20),
-
-                          padding:
-                              const EdgeInsets
-                                  .all(20),
-
-                          decoration:
-                              BoxDecoration(
-                            color:
-                                const Color(
-                                    0xC8A6CB4E),
-
-                            borderRadius:
-                                BorderRadius
-                                    .circular(
-                                        20),
-                          ),
-
-                          child: Text(
-                            step['title'],
-
-                            style:
-                                const TextStyle(
-                              fontSize:
-                                  20,
-
-                              fontWeight:
-                                  FontWeight
-                                      .bold,
-
-                              fontFamily:
-                                  'RedHatDisplay',
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  );
-                },
-              ),
-            ),
-
-            SizedBox(
-              width: double.infinity,
-
-              child: ElevatedButton(
-
-                onPressed: () {
-
-                  if (currentStep <
-                      steps.length - 1) {
-
-                    setState(() {
-
-                      currentStep++;
-                    });
-                  }
-                },
-
-                style:
-                    ElevatedButton.styleFrom(
-                  backgroundColor:
-                      const Color(
-                          0xFF003856),
-
-                  padding:
-                      const EdgeInsets.symmetric(
-                    vertical: 18,
-                  ),
-
-                  shape:
-                      RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.circular(
-                            18),
+                      );
+                    },
                   ),
                 ),
 
-                child: Text(
+                SizedBox(
+                  width: double.infinity,
 
-                  currentStep ==
-                          steps.length - 1
+                  child: ElevatedButton(
 
-                      ? "Order Completed"
+                    onPressed: () {
 
-                      : "Next Step",
+                      if (currentStep <
+                          steps.length - 1) {
 
-                  style:
-                      const TextStyle(
-                    color: Colors.white,
+                        setState(() {
 
-                    fontSize: 18,
+                          currentStep++;
+                        });
+                      }
+                    },
 
-                    fontWeight:
-                        FontWeight.bold,
+                    style:
+                        ElevatedButton.styleFrom(
+                      backgroundColor:
+                          const Color(
+                              0xFF003856),
 
-                    fontFamily:
-                        'RedHatDisplay',
+                      padding:
+                          const EdgeInsets.symmetric(
+                        vertical: 18,
+                      ),
+
+                      shape:
+                          RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius.circular(
+                                18),
+                      ),
+                    ),
+
+                    child: Text(
+
+                      currentStep ==
+                              steps.length - 1
+
+                          ? "Order Completed"
+
+                          : "Next Step",
+
+                      style:
+                          const TextStyle(
+                        color: Colors.white,
+
+                        fontSize: 18,
+
+                        fontWeight:
+                            FontWeight.bold,
+
+                        fontFamily:
+                            'RedHatDisplay',
+                      ),
+                    ),
                   ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }

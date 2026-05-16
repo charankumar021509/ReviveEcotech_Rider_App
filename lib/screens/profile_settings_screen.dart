@@ -1,7 +1,16 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+import 'login_screen.dart';
 import 'edit_profile_screen.dart';
 import 'settings_screen.dart';
 import 'order_history_screen.dart';
+import 'theme_controller.dart';
+import '../localization/language_controller.dart';
+import '../localization/app_localizations.dart';
 
 class ProfileSettingsScreen extends StatefulWidget {
   const ProfileSettingsScreen({super.key});
@@ -14,12 +23,60 @@ class ProfileSettingsScreen extends StatefulWidget {
 class _ProfileSettingsScreenState
     extends State<ProfileSettingsScreen> {
 
-  bool _isDarkMode = false;
+  String tr(String key) {
 
-  dynamic _profileImage;
+    return AppLocalizations.of(
+      context,
+    ).translate(key);
+  }
 
-  String _name = "big Bhai";
-  String _email = "helloBhai@gmail.com";
+  File? _profileImage;
+
+  String _name = "";
+  String _email = "";
+
+  @override
+  void initState() {
+
+    super.initState();
+
+    _loadProfileData();
+  }
+
+  Future<void> _loadProfileData() async {
+
+    try {
+
+      final user =
+          FirebaseAuth.instance.currentUser;
+
+      if (user != null) {
+
+        final doc =
+            await FirebaseFirestore.instance
+                .collection('agents')
+                .doc(user.uid)
+                .get();
+
+        if (doc.exists) {
+
+          setState(() {
+
+            _name =
+                doc['name'] ?? '';
+
+            _email =
+                doc['email'] ?? '';
+          });
+        }
+      }
+    } catch (e) {
+
+      debugPrint(
+        "Profile Load Error: $e",
+      );
+    }
+  }
 
   Future<void> _updateProfile() async {
 
@@ -36,14 +93,23 @@ class _ProfileSettingsScreenState
 
       setState(() {
 
-        _profileImage = result['image'];
+        if (result['image'] != null) {
+          _profileImage = File(result['image']);
+        }
 
         _name =
-            "${result['fname']} ${result['lname']}";
+            result['lname'] != null &&
+                    result['lname']
+                        .toString()
+                        .isNotEmpty
+                ? "${result['fname']} ${result['lname']}"
+                : result['fname'];
 
         _email = result['email'];
       });
     }
+
+    _loadProfileData();
   }
 
   @override
@@ -51,7 +117,7 @@ class _ProfileSettingsScreenState
 
     return Scaffold(
 
-      backgroundColor: _isDarkMode
+      backgroundColor: isDarkMode.value
           ? const Color(0xFF1E1E1E)
           : const Color(0xFFFCF3E3),
 
@@ -69,28 +135,29 @@ class _ProfileSettingsScreenState
               child: Column(
                 children: [
 
-                  // GENERAL SETTINGS
+                  /// GENERAL SETTINGS
                   _buildSectionCard(
-                    title: 'General Settings',
+                    title: tr('general_settings'),
 
                     children: [
 
                       _buildSettingsItem(
-                        icon: Icons.settings,
-                        title: 'Mode',
+                        icon: Icons.dark_mode,
+                        title: tr('mode'),
 
-                        subtitle: _isDarkMode
-                            ? 'Dark Mode'
-                            : 'Light Mode',
+                        subtitle: isDarkMode.value
+                            ? tr('dark_mode')
+                            : tr('light_mode'),
 
                         trailing: Switch(
 
-                          value: _isDarkMode,
+                          value: isDarkMode.value,
 
                           onChanged: (value) {
 
                             setState(() {
-                              _isDarkMode = value;
+
+                              isDarkMode.value = value;
                             });
                           },
 
@@ -106,7 +173,7 @@ class _ProfileSettingsScreenState
 
                       _buildSettingsItem(
                         icon: Icons.vpn_key,
-                        title: 'Change Password',
+                        title: tr('change_password'),
 
                         onTap: () {
                           _showChangePasswordDialog();
@@ -117,7 +184,7 @@ class _ProfileSettingsScreenState
 
                       _buildSettingsItem(
                         icon: Icons.translate,
-                        title: 'Language',
+                        title: tr('language'),
                         subtitle: 'English',
 
                         onTap: () {
@@ -129,23 +196,22 @@ class _ProfileSettingsScreenState
 
                       _buildSettingsItem(
                         icon: Icons.edit,
-                        title: 'Edit Profile',
+                        title: tr('edit_profile'),
 
                         onTap: _updateProfile,
                       ),
                     ],
                   ),
 
-                  // PROFILE OPTIONS
+                  /// PROFILE OPTIONS
                   _buildSectionCard(
-                    title: 'Profile Options',
+                    title: tr('profile_options'),
 
                     children: [
 
-                      // ORDER HISTORY
                       _buildSettingsItem(
                         icon: Icons.history,
-                        title: 'Order History',
+                        title: tr('history'),
 
                         onTap: () {
 
@@ -162,10 +228,9 @@ class _ProfileSettingsScreenState
 
                       _buildDivider(),
 
-                      // SETTINGS
                       _buildSettingsItem(
                         icon: Icons.settings,
-                        title: 'Settings',
+                        title: tr('settings'),
 
                         onTap: () {
 
@@ -182,137 +247,40 @@ class _ProfileSettingsScreenState
 
                       _buildDivider(),
 
-                      // LOGOUT
                       _buildSettingsItem(
                         icon: Icons.logout,
-                        title: 'Logout',
+                        title: tr('logout'),
 
-                        onTap: () {
+                        onTap: () async {
 
-                          showDialog(
-                            context: context,
+                          try {
 
-                            builder: (context) {
+                            await FirebaseAuth.instance.signOut();
 
-                              return AlertDialog(
+                            if (!mounted) return;
 
-                                title: const Text(
-                                  'Logout',
+                            Navigator.of(context).pushAndRemoveUntil(
+
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    const LoginScreen(),
+                              ),
+
+                              (route) => false,
+                            );
+
+                          } catch (e) {
+
+                            ScaffoldMessenger.of(context)
+                                .showSnackBar(
+
+                              SnackBar(
+                                content: Text(
+                                  e.toString(),
                                 ),
-
-                                content: const Text(
-                                  'Are you sure you want to logout?',
-                                ),
-
-                                actions: [
-
-                                  TextButton(
-                                    onPressed: () {
-                                      Navigator.pop(context);
-                                    },
-
-                                    child: const Text(
-                                      'Cancel',
-                                    ),
-                                  ),
-
-                                  ElevatedButton(
-                                    onPressed: () {
-
-                                      Navigator.pop(context);
-
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-
-                                        const SnackBar(
-                                          content: Text(
-                                            'Logged Out Successfully',
-                                          ),
-                                        ),
-                                      );
-                                    },
-
-                                    child: const Text(
-                                      'Logout',
-                                    ),
-                                  ),
-                                ],
-                              );
-                            },
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-
-                  // INFORMATION
-                  _buildSectionCard(
-                    title: 'Information',
-
-                    children: [
-
-                      _buildSettingsItem(
-                        icon: Icons.smartphone,
-                        title: 'About App',
-
-                        onTap: () {
-
-                          _showInfoDialog(
-                            'About App',
-
-                            'This app helps users manage deliveries and activities.',
-                          );
-                        },
-                      ),
-
-                      _buildDivider(),
-
-                      _buildSettingsItem(
-                        icon: Icons.description,
-                        title: 'Terms & Conditions',
-
-                        onTap: () {
-
-                          _showInfoDialog(
-                            'Terms & Conditions',
-
-                            'You must follow all terms and conditions while using the app.',
-                          );
-                        },
-                      ),
-
-                      _buildDivider(),
-
-                      _buildSettingsItem(
-                        icon: Icons.security,
-                        title: 'Privacy Policy',
-
-                        onTap: () {
-
-                          _showInfoDialog(
-                            'Privacy Policy',
-
-                            'Your personal data is secure and protected.',
-                          );
-                        },
-                      ),
-
-                      _buildDivider(),
-
-                      _buildSettingsItem(
-                        icon: Icons.share,
-                        title: 'Share This App',
-
-                        onTap: () {
-
-                          ScaffoldMessenger.of(context)
-                              .showSnackBar(
-
-                            const SnackBar(
-                              content:
-                                  Text('Sharing App...'),
-                            ),
-                          );
+                              ),
+                            );
+                          }
                         },
                       ),
                     ],
@@ -326,31 +294,20 @@ class _ProfileSettingsScreenState
     );
   }
 
-  // HEADER
   Widget _buildHeader(BuildContext context) {
 
     return Container(
 
       width: double.infinity,
 
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
 
-        color: const Color(0xFF003856),
+        color: Color(0xFF003856),
 
-        borderRadius: const BorderRadius.only(
+        borderRadius: BorderRadius.only(
           bottomLeft: Radius.circular(50),
           bottomRight: Radius.circular(50),
         ),
-
-        boxShadow: [
-
-          BoxShadow(
-            color: Colors.black.withAlpha(80),
-            blurRadius: 20,
-            spreadRadius: 2,
-            offset: const Offset(0, 10),
-          ),
-        ],
       ),
 
       padding: const EdgeInsets.fromLTRB(
@@ -373,21 +330,19 @@ class _ProfileSettingsScreenState
                 icon: const Icon(
                   Icons.arrow_back,
                   color: Colors.white,
-                  size: 30,
                 ),
 
                 onPressed: () =>
                     Navigator.pop(context),
               ),
 
-              const Text(
-                'Profile',
+              Text(
+                tr('profile'),
 
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  fontFamily: 'RedHatDisplay',
                 ),
               ),
 
@@ -397,64 +352,26 @@ class _ProfileSettingsScreenState
 
           const SizedBox(height: 20),
 
-          Stack(
-            alignment: Alignment.bottomRight,
+          CircleAvatar(
+            radius: 60,
 
-            children: [
+            backgroundColor:
+                const Color(0xFFFCF3E3),
 
-              GestureDetector(
-                onTap: _updateProfile,
+            backgroundImage:
+                _profileImage != null
+                    ? FileImage(_profileImage!)
+                    : null,
 
-                child: Container(
+            child: _profileImage == null
 
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
+                ? const Icon(
+                    Icons.person,
+                    size: 70,
+                    color: Color(0xFF003856),
+                  )
 
-                    border: Border.all(
-                      color: Colors.white,
-                      width: 2,
-                    ),
-                  ),
-
-                  child: CircleAvatar(
-                    radius: 65,
-
-                    backgroundColor:
-                        const Color(0xFFFCF3E3),
-
-                    child: _profileImage == null
-
-                        ? const Icon(
-                            Icons.person,
-                            size: 75,
-                            color:
-                                Color(0xFF003856),
-                          )
-
-                        : const Icon(
-                            Icons.check_circle,
-                            size: 75,
-                            color: Colors.green,
-                          ),
-                  ),
-                ),
-              ),
-
-              Container(
-                padding: const EdgeInsets.all(8),
-
-                decoration: const BoxDecoration(
-                  color: Color(0xFF007BFF),
-                  shape: BoxShape.circle,
-                ),
-
-                child: const Icon(
-                  Icons.edit,
-                  color: Colors.white,
-                  size: 20,
-                ),
-              ),
-            ],
+                : null,
           ),
 
           const SizedBox(height: 15),
@@ -464,9 +381,8 @@ class _ProfileSettingsScreenState
 
             style: const TextStyle(
               color: Colors.white,
-              fontSize: 26,
+              fontSize: 24,
               fontWeight: FontWeight.bold,
-              fontFamily: 'RedHatDisplay',
             ),
           ),
 
@@ -476,9 +392,8 @@ class _ProfileSettingsScreenState
             _email,
 
             style: const TextStyle(
-              color: Color(0xFFBDBDBD),
-              fontSize: 18,
-              fontFamily: 'RedHatDisplay',
+              color: Colors.white70,
+              fontSize: 16,
             ),
           ),
         ],
@@ -486,7 +401,6 @@ class _ProfileSettingsScreenState
     );
   }
 
-  // SECTION CARD
   Widget _buildSectionCard({
     required String title,
     required List<Widget> children,
@@ -494,25 +408,13 @@ class _ProfileSettingsScreenState
 
     return Padding(
 
-      padding: const EdgeInsets.fromLTRB(
-        10,
-        20,
-        10,
-        0,
-      ),
+      padding: const EdgeInsets.all(12),
 
       child: Card(
 
-        color: _isDarkMode
+        color: isDarkMode.value
             ? const Color(0xFF2A2A2A)
             : const Color(0xFFEEDCC6),
-
-        elevation: 3,
-
-        shape: RoundedRectangleBorder(
-          borderRadius:
-              BorderRadius.circular(10),
-        ),
 
         child: Column(
           children: [
@@ -521,29 +423,18 @@ class _ProfileSettingsScreenState
               width: double.infinity,
 
               padding:
-                  const EdgeInsets.symmetric(
-                horizontal: 20,
-                vertical: 15,
-              ),
-
-              decoration: BoxDecoration(
-                color: _isDarkMode
-                    ? Colors.black54
-                    : const Color(0xFFD6C1A7),
-              ),
+                  const EdgeInsets.all(15),
 
               child: Text(
                 title,
 
                 style: TextStyle(
                   fontSize: 20,
-                  fontWeight: FontWeight.w800,
+                  fontWeight: FontWeight.bold,
 
-                  color: _isDarkMode
+                  color: isDarkMode.value
                       ? Colors.white
-                      : const Color(0xFF333333),
-
-                  fontFamily: 'RedHatDisplay',
+                      : Colors.black,
                 ),
               ),
             ),
@@ -555,7 +446,6 @@ class _ProfileSettingsScreenState
     );
   }
 
-  // SETTINGS ITEM
   Widget _buildSettingsItem({
     required IconData icon,
     required String title,
@@ -568,34 +458,21 @@ class _ProfileSettingsScreenState
 
       onTap: onTap,
 
-      contentPadding:
-          const EdgeInsets.symmetric(
-        horizontal: 20,
-        vertical: 8,
-      ),
-
       leading: Icon(
         icon,
 
-        color: _isDarkMode
+        color: isDarkMode.value
             ? Colors.white
-            : Colors.black87,
-
-        size: 26,
+            : Colors.black,
       ),
 
       title: Text(
         title,
 
         style: TextStyle(
-          fontSize: 20,
-          fontWeight: FontWeight.w500,
-
-          color: _isDarkMode
+          color: isDarkMode.value
               ? Colors.white
-              : Colors.black87,
-
-          fontFamily: 'RedHatDisplay',
+              : Colors.black,
         ),
       ),
 
@@ -605,45 +482,28 @@ class _ProfileSettingsScreenState
               subtitle,
 
               style: TextStyle(
-                fontSize: 16,
-
-                color: _isDarkMode
+                color: isDarkMode.value
                     ? Colors.white70
-                    : Colors.black87,
-
-                fontFamily: 'RedHatDisplay',
+                    : Colors.black54,
               ),
             )
 
           : null,
 
-      trailing: trailing ??
-          Icon(
-            Icons.arrow_forward_ios,
-            size: 18,
-
-            color: _isDarkMode
-                ? Colors.white70
-                : Colors.black54,
-          ),
+      trailing: trailing,
     );
   }
 
-  // DIVIDER
   Widget _buildDivider() {
 
     return Divider(
-      height: 1,
-      indent: 20,
-      endIndent: 20,
 
-      color: _isDarkMode
+      color: isDarkMode.value
           ? Colors.white24
-          : const Color(0xFFDCCDBB),
+          : Colors.black12,
     );
   }
 
-  // CHANGE PASSWORD
   void _showChangePasswordDialog() {
 
     showDialog(
@@ -653,9 +513,8 @@ class _ProfileSettingsScreenState
 
         return AlertDialog(
 
-          title: const Text(
-            'Change Password',
-          ),
+          title:
+              Text(tr('change_password')),
 
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -691,16 +550,6 @@ class _ProfileSettingsScreenState
               onPressed: () {
 
                 Navigator.pop(context);
-
-                ScaffoldMessenger.of(context)
-                    .showSnackBar(
-
-                  const SnackBar(
-                    content: Text(
-                      'Password Changed Successfully',
-                    ),
-                  ),
-                );
               },
 
               child: const Text('Save'),
@@ -711,7 +560,6 @@ class _ProfileSettingsScreenState
     );
   }
 
-  // LANGUAGE
   void _showLanguageDialog() {
 
     showDialog(
@@ -721,9 +569,8 @@ class _ProfileSettingsScreenState
 
         return AlertDialog(
 
-          title: const Text(
-            'Select Language',
-          ),
+          title:
+              Text(tr('select_language')),
 
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -731,49 +578,45 @@ class _ProfileSettingsScreenState
             children: [
 
               ListTile(
-                title: const Text('English'),
-                onTap: () =>
-                    Navigator.pop(context),
+                title:
+                    const Text('English'),
+
+                onTap: () {
+
+                  appLocale.value =
+                      const Locale('en');
+
+                  Navigator.pop(context);
+                },
               ),
 
               ListTile(
-                title: const Text('Hindi'),
-                onTap: () =>
-                    Navigator.pop(context),
+                title:
+                    const Text('Hindi'),
+
+                onTap: () {
+
+                  appLocale.value =
+                      const Locale('hi');
+
+                  Navigator.pop(context);
+                },
+              ),
+
+              ListTile(
+                title:
+                    const Text('Telugu'),
+
+                onTap: () {
+
+                  appLocale.value =
+                      const Locale('te');
+
+                  Navigator.pop(context);
+                },
               ),
             ],
           ),
-        );
-      },
-    );
-  }
-
-  // INFO DIALOG
-  void _showInfoDialog(
-    String title,
-    String message,
-  ) {
-
-    showDialog(
-      context: context,
-
-      builder: (context) {
-
-        return AlertDialog(
-
-          title: Text(title),
-
-          content: Text(message),
-
-          actions: [
-
-            TextButton(
-              onPressed: () =>
-                  Navigator.pop(context),
-
-              child: const Text('OK'),
-            ),
-          ],
         );
       },
     );

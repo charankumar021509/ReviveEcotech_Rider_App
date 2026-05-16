@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 import 'profile_settings_screen.dart';
 import 'order_details_screen.dart';
+import 'theme_controller.dart';
+import 'package:intl/intl.dart';
+import '../widgets/custom_bottom_navbar.dart';
 
 class OrderHistoryScreen extends StatefulWidget {
   const OrderHistoryScreen({super.key});
@@ -13,66 +19,304 @@ class OrderHistoryScreen extends StatefulWidget {
 class _OrderHistoryScreenState
     extends State<OrderHistoryScreen> {
 
+  final TextEditingController
+      _searchController =
+          TextEditingController();
+
+  String searchQuery = '';
+
+  String selectedFilter =
+      'Completed';
+
+  @override
+  void initState() {
+    super.initState();
+
+    _searchController.addListener(() {
+
+      setState(() {
+
+        searchQuery =
+            _searchController.text
+                .trim()
+                .toLowerCase();
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
 
-    return Scaffold(
-      backgroundColor:
-          const Color(0xFFFCF3E3),
+    return ValueListenableBuilder(
 
-      body: Column(
-        children: [
+      valueListenable:
+          isDarkMode,
 
-          /// HEADER
-          Container(
-            height: 190,
-            width: double.infinity,
+      builder:
+          (context, value, child) {
 
-            decoration: const BoxDecoration(
-              color: Color(0xFF003856),
+        return Scaffold(
 
-              borderRadius:
-                  BorderRadius.only(
-                bottomLeft:
-                    Radius.circular(35),
-                bottomRight:
-                    Radius.circular(35),
+          backgroundColor:
+              isDarkMode.value
+                  ? const Color(
+                      0xFF1E1E1E)
+                  : const Color(
+                      0xFFFCF3E3),
+                      bottomNavigationBar:
+                          const CustomBottomNavBar(
+                        currentIndex: 1,
+                      ),
+
+          body: Column(
+            children: [
+
+              /// ================= HEADER =================
+
+              Container(
+
+                height: 190,
+
+                width:
+                    double.infinity,
+
+                decoration:
+                    const BoxDecoration(
+
+                  color:
+                      Color(0xFF003856),
+
+                  borderRadius:
+                      BorderRadius.only(
+
+                    bottomLeft:
+                        Radius.circular(
+                            35),
+
+                    bottomRight:
+                        Radius.circular(
+                            35),
+                  ),
+                ),
+
+                child:
+                    _buildHeader(),
               ),
-            ),
 
-            child: _buildHeader(),
-          ),
+              /// ================= CONTENT =================
 
-          /// CONTENT
-          Expanded(
-            child: SingleChildScrollView(
-              child: Padding(
-                padding:
-                    const EdgeInsets.all(20),
+              Expanded(
 
-                child: Column(
-                  children: [
+                child:
+                    SingleChildScrollView(
 
-                    _buildSearchBar(),
+                  child: Padding(
 
-                    const SizedBox(
-                        height: 20),
+                    padding:
+                        const EdgeInsets
+                            .all(20),
 
-                    _buildHistorySection(),
-                  ],
+                    child: Column(
+
+                      children: [
+
+                        /// SEARCH BAR
+                        _buildSearchBar(),
+
+                        const SizedBox(
+                            height: 15),
+
+                        /// ================= FILTER BUTTONS =================
+
+                        Row(
+
+                          children: [
+
+                            /// COMPLETED
+                            Expanded(
+
+                              child:
+                                  GestureDetector(
+
+                                onTap: () {
+
+                                  setState(() {
+
+                                    selectedFilter =
+                                        'Completed';
+                                  });
+                                },
+
+                                child:
+                                    AnimatedContainer(
+
+                                  duration:
+                                      const Duration(
+                                    milliseconds:
+                                        250,
+                                  ),
+
+                                  padding:
+                                      const EdgeInsets.symmetric(
+                                    vertical:
+                                        12,
+                                  ),
+
+                                  decoration:
+                                      BoxDecoration(
+
+                                    color:
+                                        selectedFilter ==
+                                                'Completed'
+
+                                            ? Colors.green
+
+                                            : isDarkMode.value
+                                                ? const Color(
+                                                    0xFF2A2A2A)
+                                                : Colors.grey.shade300,
+
+                                    borderRadius:
+                                        BorderRadius.circular(
+                                            12),
+                                  ),
+
+                                  child:
+                                      Center(
+
+                                    child:
+                                        Text(
+
+                                      'Completed',
+
+                                      style:
+                                          TextStyle(
+
+                                        color:
+                                            selectedFilter ==
+                                                    'Completed'
+
+                                                ? Colors.white
+
+                                                : isDarkMode.value
+                                                    ? Colors.white
+                                                    : Colors.black,
+
+                                        fontWeight:
+                                            FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+
+                            const SizedBox(
+                                width: 12),
+
+                            /// DECLINED
+                            Expanded(
+
+                              child:
+                                  GestureDetector(
+
+                                onTap: () {
+
+                                  setState(() {
+
+                                    selectedFilter =
+                                        'Declined';
+                                  });
+                                },
+
+                                child:
+                                    AnimatedContainer(
+
+                                  duration:
+                                      const Duration(
+                                    milliseconds:
+                                        250,
+                                  ),
+
+                                  padding:
+                                      const EdgeInsets.symmetric(
+                                    vertical:
+                                        12,
+                                  ),
+
+                                  decoration:
+                                      BoxDecoration(
+
+                                    color:
+                                        selectedFilter ==
+                                                'Declined'
+
+                                            ? Colors.red
+
+                                            : isDarkMode.value
+                                                ? const Color(
+                                                    0xFF2A2A2A)
+                                                : Colors.grey.shade300,
+
+                                    borderRadius:
+                                        BorderRadius.circular(
+                                            12),
+                                  ),
+
+                                  child:
+                                      Center(
+
+                                    child:
+                                        Text(
+
+                                      'Declined',
+
+                                      style:
+                                          TextStyle(
+
+                                        color:
+                                            selectedFilter ==
+                                                    'Declined'
+
+                                                ? Colors.white
+
+                                                : isDarkMode.value
+                                                    ? Colors.white
+                                                    : Colors.black,
+
+                                        fontWeight:
+                                            FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(
+                            height: 20),
+
+                        _buildHistorySection(),
+                      ],
+                    ),
+                  ),
                 ),
               ),
-            ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
   /// ================= HEADER =================
+
   Widget _buildHeader() {
 
     return Padding(
+
       padding:
           const EdgeInsets.symmetric(
         horizontal: 30,
@@ -80,79 +324,94 @@ class _OrderHistoryScreenState
       ),
 
       child: Row(
+
         mainAxisAlignment:
             MainAxisAlignment
                 .spaceBetween,
 
         children: [
 
-          Column(
-            crossAxisAlignment:
-                CrossAxisAlignment.start,
+          StreamBuilder<DocumentSnapshot>(
 
-            children: const [
+            stream:
+                FirebaseFirestore
+                    .instance
+                    .collection(
+                        'agents')
+                    .doc(
+                      FirebaseAuth
+                          .instance
+                          .currentUser
+                          ?.uid,
+                    )
+                    .snapshots(),
 
-              Text(
-                'Welcome back',
+            builder:
+                (context, snapshot) {
 
-                style: TextStyle(
-                  color: Colors.white70,
-                  fontSize: 16,
-                  fontFamily:
-                      'RedHatDisplay',
-                ),
-              ),
+              String name =
+                  'Agent';
 
-              SizedBox(height: 2),
+            if (snapshot.hasData &&
+                snapshot.data!.exists) {
 
-              Text(
-                'Bhai',
+              final data =
+                  snapshot.data!.data()
+                      as Map<String,
+                          dynamic>;
+               name =
+                   data['name']
+                           ?.toString() ??
+                       'Agent';
+             }
 
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 30,
-                  fontWeight:
-                      FontWeight.bold,
-                  fontFamily:
-                      'RedHatDisplay',
-                ),
-              ),
+              return Column(
 
-              SizedBox(height: 6),
+                crossAxisAlignment:
+                    CrossAxisAlignment
+                        .start,
 
-              Row(
                 children: [
 
-                  Icon(
-                    Icons
-                        .workspace_premium,
-                    color:
-                        Colors.white70,
-                    size: 16,
-                  ),
-
-                  SizedBox(width: 5),
-
-                  Text(
-                    'Priority',
+                  const Text(
+                    'Welcome back',
 
                     style: TextStyle(
                       color:
                           Colors.white70,
-                      fontFamily:
-                          'RedHatDisplay',
+                      fontSize: 16,
+                    ),
+                  ),
+
+                  const SizedBox(
+                      height: 2),
+
+                  Text(
+                    name,
+
+                    style:
+                        const TextStyle(
+
+                      color:
+                          Colors.white,
+
+                      fontSize: 30,
+
+                      fontWeight:
+                          FontWeight.bold,
                     ),
                   ),
                 ],
-              ),
-            ],
+              );
+            },
           ),
 
-          /// PROFILE
           GestureDetector(
+
             onTap: () {
 
               Navigator.push(
+
                 context,
 
                 MaterialPageRoute(
@@ -162,14 +421,22 @@ class _OrderHistoryScreenState
               );
             },
 
-            child: const CircleAvatar(
-              radius: 35,
-              backgroundColor:
-                  Color(0xFFFCF3E3),
+            child: CircleAvatar(
 
-              child: Icon(
+              radius: 35,
+
+              backgroundColor:
+                  isDarkMode.value
+                      ? const Color(
+                          0xFF2A2A2A)
+                      : const Color(
+                          0xFFFCF3E3),
+
+              child: const Icon(
                 Icons.person,
+
                 size: 40,
+
                 color:
                     Color(0xFF003856),
               ),
@@ -181,329 +448,401 @@ class _OrderHistoryScreenState
   }
 
   /// ================= SEARCH BAR =================
+
   Widget _buildSearchBar() {
 
-    return Row(
-      children: [
+    return Container(
 
-        Expanded(
-          child: Container(
-            decoration: BoxDecoration(
-              color:
-                  const Color(0xFF2C2C2C),
+      decoration: BoxDecoration(
 
-              borderRadius:
-                  BorderRadius.circular(
-                      15),
-            ),
+        color:
+            isDarkMode.value
+                ? const Color(
+                    0xFF2A2A2A)
+                : Colors.white,
 
-            child: const TextField(
-              style: TextStyle(
-                  color: Colors.white),
+        borderRadius:
+            BorderRadius.circular(
+                15),
+      ),
 
-              decoration: InputDecoration(
-                hintText: 'Search here',
+      child: TextField(
 
-                hintStyle: TextStyle(
-                    color:
-                        Colors.white54),
+        controller:
+            _searchController,
 
-                prefixIcon: Icon(
-                  Icons.search,
-                  color:
-                      Colors.white54,
-                ),
+        style: TextStyle(
 
-                border:
-                    InputBorder.none,
-
-                contentPadding:
-                    EdgeInsets.symmetric(
-                  vertical: 15,
-                  horizontal: 15,
-                ),
-              ),
-            ),
-          ),
+          color:
+              isDarkMode.value
+                  ? Colors.white
+                  : Colors.black,
         ),
 
-        const SizedBox(width: 15),
+        decoration:
+            InputDecoration(
 
-        /// FILTER
-        Container(
-          padding:
-              const EdgeInsets.all(5),
+          hintText:
+              'Search orders',
 
-          decoration: BoxDecoration(
-            color: Colors.white,
+          hintStyle: TextStyle(
 
-            borderRadius:
-                BorderRadius.circular(
-                    15),
-
-            border: Border.all(
-              color:
-                  Colors.grey.shade300,
-            ),
+            color:
+                isDarkMode.value
+                    ? Colors.white54
+                    : Colors.black54,
           ),
 
-          child:
-              PopupMenuButton<String>(
-            icon: const Icon(
-              Icons.tune,
-              color: Colors.black,
-            ),
+          prefixIcon: Icon(
 
-            onSelected: (value) {
+            Icons.search,
 
-              ScaffoldMessenger.of(
-                      context)
-                  .showSnackBar(
-                SnackBar(
-                  content: Text(
-                    '$value selected',
-                  ),
-                ),
-              );
-            },
+            color:
+                isDarkMode.value
+                    ? Colors.white54
+                    : Colors.black54,
+          ),
 
-            itemBuilder: (context) =>
-                [
+          border:
+              InputBorder.none,
 
-              const PopupMenuItem(
-                value: 'Latest',
-                child: Text('Latest'),
-              ),
-
-              const PopupMenuItem(
-                value: 'Oldest',
-                child: Text('Oldest'),
-              ),
-
-              const PopupMenuItem(
-                value: 'Completed',
-                child:
-                    Text('Completed'),
-              ),
-            ],
+          contentPadding:
+              const EdgeInsets.symmetric(
+            vertical: 15,
           ),
         ),
-      ],
+      ),
     );
   }
 
   /// ================= HISTORY SECTION =================
+
   Widget _buildHistorySection() {
 
-    return Container(
-      padding:
-          const EdgeInsets.all(20),
+    return StreamBuilder<QuerySnapshot>(
 
-      decoration: BoxDecoration(
-        color: Colors.white,
+      stream:
+          FirebaseFirestore
+              .instance
+              .collection(
+                  'pickups')
+              .snapshots(),
 
-        borderRadius:
-            BorderRadius.circular(20),
-      ),
+      builder:
+          (context, snapshot) {
 
-      child: Column(
-        children: [
+        if (snapshot.connectionState ==
+            ConnectionState.waiting) {
 
-          Row(
-            mainAxisAlignment:
-                MainAxisAlignment
-                    .spaceBetween,
+          return const Center(
+            child:
+                CircularProgressIndicator(),
+          );
+        }
 
-            children: const [
+        if (!snapshot.hasData ||
+            snapshot.data!.docs.isEmpty) {
 
-              Text(
-                'History',
+          return const Center(
+            child: Text(
+              'No Orders Found',
+            ),
+          );
+        }
 
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight:
-                      FontWeight.bold,
-                  fontFamily:
-                      'RedHatDisplay',
-                ),
+        final orders =
+            snapshot.data!.docs.where(
+          (doc) {
+
+            final data =
+                doc.data()
+                    as Map<String,
+                        dynamic>;
+
+            /// FILTER
+            bool matchesFilter =
+                false;
+
+            if (selectedFilter ==
+                'Completed') {
+
+              matchesFilter =
+
+                  data['status'] ==
+                      'Completed' &&
+
+                  data['declinedStatus'] !=
+                      true;
+
+            } else {
+
+              matchesFilter =
+                  data['declinedStatus'] ==
+                      true;
+            }
+
+            /// SEARCH
+            final address =
+                data['addressDetails'];
+
+            final fullAddress =
+                address?['fullAddress']
+                        ?.toString()
+                        .toLowerCase() ??
+                    '';
+
+            return matchesFilter &&
+                fullAddress.contains(
+                    searchQuery);
+          },
+        ).toList();
+
+        if (orders.isEmpty) {
+
+          return Center(
+
+            child: Text(
+
+              selectedFilter ==
+                      'Completed'
+
+                  ? 'No Completed Orders'
+
+                  : 'No Declined Orders',
+            ),
+          );
+        }
+
+        return Column(
+
+          children:
+              orders.map((order) {
+
+            final data =
+                order.data()
+                    as Map<String,
+                        dynamic>;
+
+            final address =
+                data['addressDetails'];
+
+            return Container(
+
+              margin:
+                  const EdgeInsets.only(
+                      bottom: 15),
+
+              padding:
+                  const EdgeInsets.all(
+                      18),
+
+              decoration:
+                  BoxDecoration(
+
+                color:
+                    isDarkMode.value
+                        ? const Color(
+                            0xFF2A2A2A)
+                        : Colors.white,
+
+                borderRadius:
+                    BorderRadius.circular(
+                        20),
               ),
 
-              Row(
+              child: Column(
+
+                crossAxisAlignment:
+                    CrossAxisAlignment
+                        .start,
+
                 children: [
 
                   Text(
-                    'Sort by',
+
+                    "Customer Order",
 
                     style: TextStyle(
-                      color: Colors.grey,
-                      fontFamily:
-                          'RedHatDisplay',
+
+                      fontSize: 20,
+
+                      fontWeight:
+                          FontWeight.bold,
+
+                      color:
+                          isDarkMode.value
+                              ? Colors.white
+                              : Colors.black,
                     ),
                   ),
 
-                  SizedBox(width: 5),
+                  const SizedBox(
+                      height: 10),
 
                   Text(
-                    'Latest',
+
+                    address?['fullAddress']
+                            ?.toString() ??
+                        '',
 
                     style: TextStyle(
-                      fontWeight:
-                          FontWeight.bold,
-                      fontFamily:
-                          'RedHatDisplay',
+
+                      color:
+                          isDarkMode.value
+                              ? Colors.white70
+                              : Colors.black87,
                     ),
+                  ),
+
+                  const SizedBox(
+                      height: 10),
+
+                  Text(
+
+                    "Pickup Date: ${DateFormat(
+                      'dd/MM/yyyy',
+                    ).format(
+
+                      (data['pickupDate']
+                              as Timestamp)
+                          .toDate(),
+                    )}",
+                  ),
+
+                  const SizedBox(
+                      height: 5),
+
+                  Text(
+                    "Pickup Time: ${data['pickupTimeSlot'] ?? ''}",
+                  ),
+
+                  const SizedBox(
+                      height: 15),
+
+                  Row(
+
+                    children: [
+
+                      Expanded(
+
+                        child:
+                            ElevatedButton(
+
+                          onPressed:
+                              () {
+
+                            Navigator.push(
+
+                              context,
+
+                              MaterialPageRoute(
+
+                                builder: (_) =>
+
+                                    OrderDetailsScreen(
+
+                                  pickupAddress:
+                                      address?[
+                                                  'fullAddress']
+                                              ?.toString() ??
+                                          '',
+
+                                  dropAddress:
+                                      'Revive EcoTech',
+
+                                 pickupDate:
+
+                                     data['pickupDate'] != null
+
+                                         ? DateFormat(
+                                             'dd/MM/yyyy',
+                                           ).format(
+
+                                             (data['pickupDate']
+                                                     as Timestamp)
+                                                 .toDate(),
+                                           )
+
+                                         : '',
+
+                                  pickupTime:
+                                      data['pickupTimeSlot']
+                                              ?.toString() ??
+                                          '',
+
+                                  customerPhone:
+                                      data['customerPhone']
+                                              ?.toString() ??
+                                          '',
+
+                                  scrapItems:
+                                      data['scrapCategories'] ??
+                                          [],
+
+                                  orderId:
+                                      order.id,
+
+                                  latitude:
+                                      (address?['latitude'] ??
+                                              0.0)
+                                          .toDouble(),
+
+                                  longitude:
+                                      (address?['longitude'] ??
+                                              0.0)
+                                          .toDouble(),
+
+                                  userId:
+                                      data['userId']
+                                              ?.toString() ??
+                                          '',
+                                ),
+                              ),
+                            );
+                          },
+
+                          style:
+                              ElevatedButton.styleFrom(
+
+                            backgroundColor:
+                                const Color(
+                                    0xFF003856),
+
+                            padding:
+                                const EdgeInsets.symmetric(
+                              vertical: 14,
+                            ),
+
+                            shape:
+                                RoundedRectangleBorder(
+
+                              borderRadius:
+                                  BorderRadius.circular(
+                                      14),
+                            ),
+                          ),
+
+                          child: const Text(
+
+                            'View Details',
+
+                            style: TextStyle(
+                              color:
+                                  Colors.white,
+                              fontWeight:
+                                  FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
-            ],
-          ),
-
-          const SizedBox(height: 15),
-
-          _buildHistoryItem(),
-
-          const SizedBox(height: 15),
-
-          _buildHistoryItem(),
-
-          const SizedBox(height: 15),
-
-          _buildHistoryItem(),
-
-          const SizedBox(height: 15),
-
-          _buildHistoryItem(),
-        ],
-      ),
-    );
-  }
-
-  /// ================= HISTORY ITEM =================
-  Widget _buildHistoryItem() {
-
-    return Container(
-      padding:
-          const EdgeInsets.all(20),
-
-      decoration: BoxDecoration(
-        color:
-            const Color(0xC8A6CB4E),
-
-        borderRadius:
-            BorderRadius.circular(20),
-      ),
-
-      child: Row(
-        crossAxisAlignment:
-            CrossAxisAlignment.start,
-
-        children: [
-
-          Expanded(
-            child: Column(
-              crossAxisAlignment:
-                  CrossAxisAlignment
-                      .start,
-
-              children: const [
-
-                Text(
-                  'Customer #1',
-
-                  style: TextStyle(
-                    fontWeight:
-                        FontWeight.bold,
-                    fontSize: 16,
-                    fontFamily:
-                        'RedHatDisplay',
-                  ),
-                ),
-
-                SizedBox(height: 5),
-
-                Text(
-                  'Required to pick up: 13:10',
-
-                  style: TextStyle(
-                    fontFamily:
-                        'RedHatDisplay',
-                  ),
-                ),
-
-                SizedBox(height: 5),
-
-                Text(
-                  'Pick up Location',
-
-                  style: TextStyle(
-                    fontFamily:
-                        'RedHatDisplay',
-                  ),
-                ),
-
-                SizedBox(height: 5),
-
-                Text(
-                  'Delivery address',
-
-                  style: TextStyle(
-                    fontFamily:
-                        'RedHatDisplay',
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(width: 10),
-
-          /// DETAILS BUTTON
-          ElevatedButton(
-            onPressed: () {
-
-              Navigator.push(
-                context,
-
-                MaterialPageRoute(
-                  builder: (context) =>
-                      const OrderDetailsScreen(),
-                ),
-              );
-            },
-
-            style:
-                ElevatedButton.styleFrom(
-              backgroundColor:
-                  Colors.white,
-
-              foregroundColor:
-                  Colors.black,
-
-              padding:
-                  const EdgeInsets.symmetric(
-                horizontal: 28,
-                vertical: 14,
-              ),
-
-              shape:
-                  RoundedRectangleBorder(
-                borderRadius:
-                    BorderRadius
-                        .circular(20),
-              ),
-            ),
-
-            child: const Text(
-              'Details',
-
-              style: TextStyle(
-                fontFamily:
-                    'RedHatDisplay',
-              ),
-            ),
-          ),
-        ],
-      ),
+            );
+          }).toList(),
+        );
+      },
     );
   }
 }

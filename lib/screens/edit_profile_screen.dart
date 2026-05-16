@@ -1,6 +1,12 @@
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+import 'theme_controller.dart';
+import '../localization/app_localizations.dart';
 
 class EditProfileScreen extends StatefulWidget {
   EditProfileScreen({super.key});
@@ -13,29 +19,79 @@ class EditProfileScreen extends StatefulWidget {
 class _EditProfileScreenState
     extends State<EditProfileScreen> {
 
-  // ✅ PROFILE IMAGE
+  String tr(String key) {
+
+    return AppLocalizations.of(
+      context,
+    ).translate(key);
+  }
+
   File? _profileImage;
 
-  // ✅ Controllers
   final TextEditingController _firstNameController =
-      TextEditingController(text: 'bhai');
+      TextEditingController();
 
   final TextEditingController _lastNameController =
-      TextEditingController(text: 'ji');
+      TextEditingController();
 
   final TextEditingController _phoneController =
-      TextEditingController(text: '123456789');
+      TextEditingController();
 
   final TextEditingController _emailController =
-      TextEditingController(text: 'abc@gmail.com');
+      TextEditingController();
 
   final TextEditingController _addressController =
-      TextEditingController(
-          text: 'Madhurawada, Endada Road');
+      TextEditingController();
 
-  int _selectedIndex = 2;
+  @override
+  void initState() {
 
-  // ✅ PICK IMAGE FUNCTION
+    super.initState();
+
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+
+    try {
+
+      final user =
+          FirebaseAuth.instance.currentUser;
+
+      if (user != null) {
+
+        final doc =
+            await FirebaseFirestore.instance
+                .collection('agents')
+                .doc(user.uid)
+                .get();
+
+        if (doc.exists) {
+
+          setState(() {
+
+            _firstNameController.text =
+                doc['name'] ?? '';
+
+            _emailController.text =
+                doc['email'] ?? '';
+
+            _phoneController.text =
+                doc['phone'] ?? '';
+
+            _addressController.text =
+                doc['address'] ?? '';
+          });
+        }
+      }
+    } catch (e) {
+
+      debugPrint(
+        "Load User Error: $e",
+      );
+    }
+  }
+
   Future<void> _pickImage() async {
 
     final ImagePicker picker = ImagePicker();
@@ -58,160 +114,198 @@ class _EditProfileScreenState
   @override
   Widget build(BuildContext context) {
 
-    return Scaffold(
-      backgroundColor:
-          const Color(0xFFFCF3E3),
+    return ValueListenableBuilder(
+      valueListenable: isDarkMode,
 
-      resizeToAvoidBottomInset: true,
+      builder: (context, value, child) {
 
-      body: Column(
-        children: [
+        return Scaffold(
 
-          _buildHeader(context),
+          backgroundColor:
+              isDarkMode.value
+                  ? const Color(0xFF1E1E1E)
+                  : const Color(0xFFFCF3E3),
 
-          Expanded(
-            child: SingleChildScrollView(
-              padding:
-                  const EdgeInsets.symmetric(
-                horizontal: 25,
-                vertical: 25,
-              ),
+          resizeToAvoidBottomInset: true,
 
-              child: Column(
-                children: [
+          body: Column(
+            children: [
 
-                  _buildEditField(
-                    'First Name',
-                    _firstNameController,
+              _buildHeader(context),
+
+              Expanded(
+                child: SingleChildScrollView(
+                  padding:
+                      const EdgeInsets.symmetric(
+                    horizontal: 25,
+                    vertical: 25,
                   ),
 
-                  const SizedBox(height: 20),
+                  child: Column(
+                    children: [
 
-                  _buildEditField(
-                    'Last Name',
-                    _lastNameController,
-                  ),
+                      _buildEditField(
+                        tr('first_name'),
+                        _firstNameController,
+                      ),
 
-                  const SizedBox(height: 20),
+                      const SizedBox(height: 20),
 
-                  _buildEditField(
-                    'Phone no.',
-                    _phoneController,
+                      _buildEditField(
+                        tr('last_name'),
+                        _lastNameController,
+                      ),
 
-                    keyboardType:
-                        TextInputType.phone,
-                  ),
+                      const SizedBox(height: 20),
 
-                  const SizedBox(height: 20),
+                      _buildEditField(
+                        tr('phone_number'),
+                        _phoneController,
 
-                  _buildEditField(
-                    'Mail',
-                    _emailController,
+                        keyboardType:
+                            TextInputType.phone,
+                      ),
 
-                    keyboardType:
-                        TextInputType.emailAddress,
-                  ),
+                      const SizedBox(height: 20),
 
-                  const SizedBox(height: 20),
+                      _buildEditField(
+                        tr('mail'),
+                        _emailController,
 
-                  _buildEditField(
-                    'Address',
-                    _addressController,
-                  ),
+                        keyboardType:
+                            TextInputType.emailAddress,
+                      ),
 
-                  const SizedBox(height: 35),
+                      const SizedBox(height: 20),
 
-                  // 🟢 SAVE BUTTON
-                  Padding(
-                    padding:
-                        const EdgeInsets.symmetric(
-                      horizontal: 15,
-                    ),
+                      _buildEditField(
+                        tr('address'),
+                        _addressController,
+                      ),
 
-                    child: SizedBox(
-                      width: double.infinity,
+                      const SizedBox(height: 35),
 
-                      child: ElevatedButton(
-                        onPressed: () {
-
-                          Navigator.pop(context, {
-
-                            'fname':
-                                _firstNameController.text,
-
-                            'lname':
-                                _lastNameController.text,
-
-                            'phone':
-                                _phoneController.text,
-
-                            'email':
-                                _emailController.text,
-
-                            'address':
-                                _addressController.text,
-
-                            'image':
-                                _profileImage,
-                          });
-                        },
-
-                        style:
-                            ElevatedButton.styleFrom(
-                          backgroundColor:
-                              const Color(
-                            0xFF98C13F,
-                          ),
-
-                          padding:
-                              const EdgeInsets.symmetric(
-                            vertical: 16,
-                          ),
-
-                          shape:
-                              RoundedRectangleBorder(
-                            borderRadius:
-                                BorderRadius.circular(
-                                    50),
-                          ),
-
-                          elevation: 8,
-                          shadowColor:
-                              Colors.black,
+                      Padding(
+                        padding:
+                            const EdgeInsets.symmetric(
+                          horizontal: 15,
                         ),
 
-                        child: const Text(
-                          'Save Changes',
+                        child: SizedBox(
+                          width: double.infinity,
 
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight:
-                                FontWeight.bold,
+                          child: ElevatedButton(
+                            onPressed: () async {
 
-                            color: Colors.white,
+                              try {
 
-                            fontFamily:
-                                'RedHatDisplay',
+                                final user =
+                                    FirebaseAuth.instance.currentUser;
+
+                                if (user != null) {
+
+                                  await FirebaseFirestore.instance
+                                      .collection('agents')
+                                      .doc(user.uid)
+                                      .update({
+
+                                    'name':
+                                        _firstNameController.text.trim(),
+
+                                    'email':
+                                        _emailController.text.trim(),
+
+                                    'phone':
+                                        _phoneController.text.trim(),
+
+                                    'address':
+                                        _addressController.text.trim(),
+                                  });
+
+                                  if (!mounted) return;
+
+                                  Navigator.pop(context, {
+                                    'fname':
+                                        _firstNameController.text.trim(),
+
+                                    'lname':
+                                        _lastNameController.text.trim(),
+
+                                    'email':
+                                        _emailController.text.trim(),
+
+                                    'image':
+                                        _profileImage?.path,
+                                  });
+                                }
+                              } catch (e) {
+
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(
+
+                                  SnackBar(
+                                    content: Text(
+                                      e.toString(),
+                                    ),
+                                  ),
+                                );
+                              }
+                            },
+
+                            style:
+                                ElevatedButton.styleFrom(
+                              backgroundColor:
+                                  const Color(
+                                0xFF98C13F,
+                              ),
+
+                              padding:
+                                  const EdgeInsets.symmetric(
+                                vertical: 16,
+                              ),
+
+                              shape:
+                                  RoundedRectangleBorder(
+                                borderRadius:
+                                    BorderRadius.circular(
+                                        50),
+                              ),
+
+                              elevation: 8,
+                              shadowColor:
+                                  Colors.black,
+                            ),
+
+                            child: Text(
+                              tr('save_changes'),
+
+                              style: const TextStyle(
+                                fontSize: 24,
+                                fontWeight:
+                                    FontWeight.bold,
+
+                                color: Colors.white,
+
+                                fontFamily:
+                                    'RedHatDisplay',
+                              ),
+                            ),
                           ),
                         ),
                       ),
-                    ),
+
+                      const SizedBox(height: 20),
+                    ],
                   ),
-
-                  const SizedBox(height: 20),
-                ],
+                ),
               ),
-            ),
+            ],
           ),
-        ],
-      ),
-
-      bottomNavigationBar:
-          _buildBottomNavBar(),
+        );
+      },
     );
   }
 
-  // ================= HEADER =================
   Widget _buildHeader(
       BuildContext context) {
 
@@ -271,10 +365,10 @@ class _EditProfileScreenState
                     Navigator.pop(context),
               ),
 
-              const Text(
-                'Edit Profile',
+              Text(
+                tr('edit_profile'),
 
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 24,
                   fontWeight:
@@ -291,7 +385,6 @@ class _EditProfileScreenState
 
           const SizedBox(height: 20),
 
-          // ✅ PROFILE IMAGE
           Stack(
             alignment:
                 Alignment.bottomRight,
@@ -323,19 +416,20 @@ class _EditProfileScreenState
                   radius: 65,
 
                   backgroundColor:
-                      const Color(
-                    0xFFFCF3E3,
-                  ),
+                      isDarkMode.value
+                          ? const Color(
+                              0xFF2A2A2A)
+                          : const Color(
+                              0xFFFCF3E3),
 
                   backgroundImage:
                       _profileImage != null
-                          ? FileImage(
-                              _profileImage!,
-                            )
+                          ? FileImage(_profileImage!)
                           : null,
 
                   child:
                       _profileImage == null
+
                           ? const Icon(
                               Icons.person,
                               size: 75,
@@ -344,11 +438,11 @@ class _EditProfileScreenState
                                 0xFF003856,
                               ),
                             )
+
                           : null,
                 ),
               ),
 
-              // ✅ PICK IMAGE
               GestureDetector(
                 onTap: _pickImage,
 
@@ -380,7 +474,6 @@ class _EditProfileScreenState
     );
   }
 
-  // ================= INPUT FIELDS =================
   Widget _buildEditField(
     String label,
     TextEditingController controller, {
@@ -425,25 +518,16 @@ class _EditProfileScreenState
 
           child: Container(
             decoration: BoxDecoration(
-              color: Colors.white,
+
+              color:
+                  isDarkMode.value
+                      ? const Color(
+                          0xFF2A2A2A)
+                      : Colors.white,
 
               borderRadius:
                   BorderRadius.circular(
                       50),
-
-              boxShadow: [
-
-                BoxShadow(
-                  color: Colors.black
-                      .withAlpha(76),
-
-                  spreadRadius: 2,
-                  blurRadius: 10,
-
-                  offset:
-                      const Offset(0, 4),
-                ),
-              ],
             ),
 
             child: TextField(
@@ -452,9 +536,12 @@ class _EditProfileScreenState
               keyboardType:
                   keyboardType,
 
-              style: const TextStyle(
+              style: TextStyle(
                 color:
-                    Color(0xFF003856),
+                    isDarkMode.value
+                        ? Colors.white
+                        : const Color(
+                            0xFF003856),
 
                 fontWeight:
                     FontWeight.w800,
@@ -479,145 +566,6 @@ class _EditProfileScreenState
           ),
         ),
       ],
-    );
-  }
-
-  // ================= BOTTOM NAV BAR =================
-  Widget _buildBottomNavBar() {
-
-    final navBarItems = [
-
-      {
-        'icon': Icons.dashboard,
-        'label': 'Dashboard'
-      },
-
-      {
-        'icon': Icons.wallet_travel,
-        'label': 'Wallet'
-      },
-
-      {
-        'icon': Icons.settings,
-        'label': 'Settings'
-      },
-
-      {
-        'icon': Icons.history,
-        'label': 'History'
-      },
-    ];
-
-    return Container(
-      margin: const EdgeInsets.all(15),
-
-      padding:
-          const EdgeInsets.symmetric(
-        horizontal: 15,
-        vertical: 8,
-      ),
-
-      decoration: BoxDecoration(
-        color:
-            const Color(0xFFB5D178),
-
-        borderRadius:
-            BorderRadius.circular(35),
-      ),
-
-      child: Row(
-        mainAxisAlignment:
-            MainAxisAlignment
-                .spaceBetween,
-
-        children: List.generate(
-          navBarItems.length,
-          (index) {
-
-            final item =
-                navBarItems[index];
-
-            final isSelected =
-                _selectedIndex ==
-                    index;
-
-            return GestureDetector(
-              onTap: () {
-
-                setState(() =>
-                    _selectedIndex =
-                        index);
-              },
-
-              child: isSelected
-                  ? Container(
-                      padding:
-                          const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 10,
-                      ),
-
-                      decoration:
-                          BoxDecoration(
-                        color:
-                            Colors.white,
-
-                        borderRadius:
-                            BorderRadius.circular(
-                                25),
-                      ),
-
-                      child: Row(
-                        children: [
-
-                          Icon(
-                            item['icon']
-                                as IconData,
-
-                            color:
-                                Colors.black,
-                          ),
-
-                          const SizedBox(
-                              width: 8),
-
-                          Text(
-                            item['label']
-                                as String,
-
-                            style:
-                                const TextStyle(
-                              fontWeight:
-                                  FontWeight.bold,
-
-                              fontFamily:
-                                  'RedHatDisplay',
-                            ),
-                          ),
-                        ],
-                      ),
-                    )
-
-                  : Padding(
-                      padding:
-                          const EdgeInsets
-                              .all(10.0),
-
-                      child: Icon(
-                        item['icon']
-                            as IconData,
-
-                        color:
-                            const Color(
-                                0xFF003856),
-
-                        size: 28,
-                      ),
-                    ),
-            );
-          },
-        ),
-      ),
     );
   }
 
